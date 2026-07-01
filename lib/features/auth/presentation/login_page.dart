@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+import 'dart:math' as math show pi, sin;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';

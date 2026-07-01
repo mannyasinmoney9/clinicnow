@@ -85,8 +85,6 @@ class _OtpPageState extends ConsumerState<OtpPage>
       _errorMsg = null;
     });
     try {
-      final auth = ref.read(authProvider);
-      // We need to verify via the repository directly then update state
       await ref
           .read(authProvider.notifier)
           .verifyOtp(widget.email, _enteredCode);
