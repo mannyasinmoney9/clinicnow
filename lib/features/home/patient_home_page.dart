@@ -5,7 +5,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/network/health_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../shared/widgets/connection_banner.dart';
 import '../auth/presentation/auth_providers.dart';
 
 class PatientHomePage extends ConsumerStatefulWidget {
@@ -62,6 +64,9 @@ class _PatientHomePageState extends ConsumerState<PatientHomePage>
           SafeArea(
             child: Column(
               children: [
+                // Connection status banner (slides in when backend unreachable)
+                const ConnectionBanner(),
+
                 // App bar
                 _HomeAppBar(
                   name: user?.firstName ?? 'there',
@@ -74,7 +79,25 @@ class _PatientHomePageState extends ConsumerState<PatientHomePage>
 
                 // Scrollable body
                 Expanded(
-                  child: SingleChildScrollView(
+                  child: RefreshIndicator(
+                    color: AppColors.trustTeal,
+                    onRefresh: () async {
+                      await ref.read(healthProvider.notifier).check();
+                      if (!context.mounted) return;
+                      final ok = ref.read(healthProvider) == BackendStatus.ok;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(ok
+                              ? '✓ Connected to server'
+                              : 'Still unreachable — is the backend running?'),
+                          duration: const Duration(seconds: 2),
+                          backgroundColor:
+                              ok ? AppColors.nairaGreen : AppColors.emergencyRed,
+                        ),
+                      );
+                    },
+                    child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,7 +187,8 @@ class _PatientHomePageState extends ConsumerState<PatientHomePage>
                       ],
                     ),
                   ),
-                ),
+                  ),  // RefreshIndicator
+                ),    // Expanded
               ],
             ),
           ),
