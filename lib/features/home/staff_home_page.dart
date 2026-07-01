@@ -3,9 +3,11 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/network/health_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/widgets/signature_widgets.dart';
+import '../../shared/widgets/connection_banner.dart';
 import '../auth/presentation/auth_providers.dart';
 
 class StaffHomePage extends ConsumerWidget {
@@ -37,9 +39,17 @@ class StaffHomePage extends ConsumerWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
+      body: Column(
+        children: [
+          const ConnectionBanner(),
+          Expanded(
+            child: RefreshIndicator(
+              color: AppColors.trustTeal,
+              onRefresh: () => ref.read(healthProvider.notifier).check(),
+              child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Stats row
@@ -86,7 +96,11 @@ class StaffHomePage extends ConsumerWidget {
             ).animate().fadeIn(delay: 300.ms, duration: 400.ms),
           ],
         ),
-      ),
+        ),  // SingleChildScrollView
+        ),  // RefreshIndicator
+      ),    // Expanded
+    ],
+  ),        // body Column
     );
   }
 }
