@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 
-class PrimaryButton extends StatelessWidget {
+class PrimaryButton extends StatefulWidget {
   const PrimaryButton({
     super.key,
     required this.label,
@@ -18,9 +18,33 @@ class PrimaryButton extends StatelessWidget {
   final bool fullWidth;
 
   @override
+  State<PrimaryButton> createState() => _PrimaryButtonState();
+}
+
+class _PrimaryButtonState extends State<PrimaryButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 110));
+    _scale = Tween<double>(begin: 1.0, end: 0.96)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     Widget child;
-    if (loading) {
+    if (widget.loading) {
       child = SizedBox(
         width: 20,
         height: 20,
@@ -29,25 +53,39 @@ class PrimaryButton extends StatelessWidget {
           color: context.colors.onPrimary,
         ),
       );
-    } else if (icon != null) {
+    } else if (widget.icon != null) {
       child = Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18),
+          Icon(widget.icon, size: 18),
           const SizedBox(width: AppSpacing.sm),
-          Text(label),
+          Text(widget.label),
         ],
       );
     } else {
-      child = Text(label);
+      child = Text(widget.label);
     }
 
-    final button = FilledButton(
-      onPressed: loading ? null : onPressed,
-      child: child,
+    final button = ScaleTransition(
+      scale: _scale,
+      child: GestureDetector(
+        onTapDown:
+            widget.loading || widget.onPressed == null ? null : (_) => _ctrl.forward(),
+        onTapUp: widget.loading || widget.onPressed == null
+            ? null
+            : (_) {
+                _ctrl.reverse();
+                widget.onPressed?.call();
+              },
+        onTapCancel: () => _ctrl.reverse(),
+        child: FilledButton(
+          onPressed: widget.loading ? null : widget.onPressed,
+          child: child,
+        ),
+      ),
     );
 
-    return fullWidth
+    return widget.fullWidth
         ? SizedBox(width: double.infinity, child: button)
         : button;
   }

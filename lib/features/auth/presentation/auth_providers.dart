@@ -29,6 +29,12 @@ final class AuthUnauthenticated extends AuthState {
   const AuthUnauthenticated();
 }
 
+final class AuthRegistered extends AuthState {
+  const AuthRegistered({required this.email, required this.otpCode});
+  final String email;
+  final String? otpCode; // non-null in dev/demo; null in production
+}
+
 final class AuthError extends AuthState {
   const AuthError(this.message);
   final String message;
@@ -55,6 +61,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = const AuthLoading();
     try {
       final user = await _repo.login(email, password);
+      // Save credentials for auto-fill on next open
+      await _repo.saveCredentials(email, password);
       state = AuthAuthenticated(user);
     } on DioException catch (e) {
       state = AuthError(_dioMsg(e));
@@ -72,18 +80,34 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }) async {
     state = const AuthLoading();
     try {
-      final user = await _repo.register(
+      final result = await _repo.register(
         fullName: fullName,
         email: email,
         password: password,
         phone: phone,
         role: role,
       );
-      state = AuthAuthenticated(user);
+      // Navigate to OTP verification — do NOT authenticate yet
+      state = AuthRegistered(
+          email: email, otpCode: result.otpCode);
     } on DioException catch (e) {
       state = AuthError(_dioMsg(e));
     } on Exception catch (e) {
       state = AuthError(e.toString());
+    }
+  }
+
+  Future<void> verifyOtp(String email, String code) async {
+    state = const AuthLoading();
+    try {
+      final user = await _repo.verifyOtp(email, code);
+      state = AuthAuthenticated(user);
+    } on DioException catch (e) {
+      state = AuthError(_dioMsg(e));
+      throw Exception(_dioMsg(e));
+    } on Exception catch (e) {
+      state = AuthError(e.toString());
+      rethrow;
     }
   }
 
@@ -97,7 +121,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     if (data is Map<String, dynamic>) {
       return (data['message'] ?? data['error'] ?? 'Server error').toString();
     }
-    return e.message ?? 'Network error — check your connection';
+    if (e.type.name.contains('connection') ||
+        e.type.name.contains('timeout') ||
+        e.type.name.contains('receive')) {
+      return 'Cannot reach server — make sure backend is running and you\'re on the same network';
+    }
+    return e.message ?? 'Network error — check connection';
   }
 }
 
