@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClinicNow — Design Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.17.0/dist/tabler-icons.min.css">
+<style>
+:root{
+  --bg1:#E7F0F0; --bg2:#F4F9F9;
+  --screen:#F7FBFB; --surface:#FFFFFF; --surface2:#F0F6F5;
+  --ink:#0F2A28; --muted:#5E7775; --faint:#9DB3B0;
+  --border:#E6EFEE; --hair:#EFF5F4;
+  --teal:#0BA5A4; --teal-d:#0A8E8C; --green:#10B981; --amber:#F59E0B; --red:#DC2626;
+  --tint-teal:#E1F5F2; --tint-green:#E4F7EF; --tint-amber:#FCF0DC; --tint-red:#FBE9E9;
+  --on-tint-teal:#0A7E76; --on-tint-green:#0E8C63; --on-tint-amber:#B5790C; --on-tint-red:#B91C1C;
+  --card-sh:0 10px 30px rgba(15,42,40,.07), 0 2px 6px rgba(15,42,40,.04);
+  --phone-sh:0 34px 70px -28px rgba(8,46,44,.45), 0 8px 20px -10px rgba(8,46,44,.25);
+  --grad:linear-gradient(135deg,#0BA5A4 0%,#10B981 100%);
+  --grad-soft:linear-gradient(135deg,#0BA5A4 0%,#13B58C 60%,#10B981 100%);
+}
+[data-theme="dark"]{
+  --bg1:#06100F; --bg2:#0A1413;
+  --screen:#0A1413; --surface:#12201E; --surface2:#0E1A19;
+  --ink:#E2EEEC; --muted:#9DB3B0; --faint:#5E7775;
+  --border:#1E2F2D; --hair:#16241F;
+  --teal:#19B6B4; --teal-d:#0E8E8C; --green:#22C58E; --amber:#FBBF24; --red:#F87171;
+  --tint-teal:#0C2B2A; --tint-green:#0C2A23; --tint-amber:#2C2208; --tint-red:#2E1414;
+  --on-tint-teal:#5EE0DD; --on-tint-green:#56E0AE; --on-tint-amber:#F8C75A; --on-tint-red:#F8A0A0;
+  --card-sh:0 12px 30px rgba(0,0,0,.45); --phone-sh:0 34px 70px -26px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',system-ui,sans-serif;background:linear-gradient(160deg,var(--bg1),var(--bg2));color:var(--ink);min-height:100vh;padding:28px 20px 64px;transition:background .5s ease,color .35s ease}
+.wrap{max-width:1240px;margin:0 auto}
+.disp{font-family:'Bricolage Grotesque','Manrope',sans-serif}
+.tab{font-variant-numeric:tabular-nums}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:16px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:13px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:22px;box-shadow:0 8px 20px -6px rgba(11,165,164,.6)}
+.brand h1{font-size:24px;font-weight:800;letter-spacing:-.6px}
+.brand p{font-size:12.5px;color:var(--muted)}
+.toggle{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);padding:7px 8px 7px 14px;border-radius:999px;cursor:pointer;box-shadow:var(--card-sh);user-select:none;transition:background .5s,border-color .5s}
+.toggle span{font-size:13px;font-weight:600;color:var(--muted)}
+.knob{position:relative;width:54px;height:28px;border-radius:999px;background:var(--surface2);border:1px solid var(--border);transition:background .5s}
+.knob i{position:absolute;top:3px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:13px;color:#fff;background:var(--grad);transition:left .4s cubic-bezier(.34,1.56,.64,1);left:3px}
+[data-theme="dark"] .knob i{left:29px;background:linear-gradient(135deg,#1f2b46,#3a4a78)}
+.lead{color:var(--muted);font-size:14px;margin:14px 0 26px;max-width:680px;line-height:1.6}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(286px,1fr));gap:30px}
+.case{display:flex;flex-direction:column;gap:11px;opacity:0;animation:rise .6s ease forwards}
+.cap{padding-left:4px}
+.cap b{font-family:'Bricolage Grotesque';font-size:15px;font-weight:700;letter-spacing:-.2px}
+.cap span{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+.phone{background:var(--screen);border:1px solid var(--border);border-radius:38px;padding:9px;box-shadow:var(--phone-sh);transition:transform .35s ease,box-shadow .5s,background .5s;will-change:transform}
+.phone:hover{transform:translateY(-6px)}
+.scr{background:var(--screen);border-radius:30px;height:582px;overflow:hidden;display:flex;flex-direction:column;position:relative;transition:background .5s}
+.sb{display:flex;justify-content:space-between;align-items:center;padding:11px 20px 0;font-size:11px;color:var(--muted)}
+.sb i{margin-left:5px}
+.ab{display:flex;align-items:center;justify-content:space-between;padding:10px 18px}
+.ab .bk{font-size:20px;color:var(--ink)}
+.av{width:38px;height:38px;border-radius:50%;background:var(--tint-teal);color:var(--on-tint-teal);display:grid;place-items:center;font-weight:700;font-size:13px}
+.pad{padding:4px 18px}
+.h1{font-family:'Bricolage Grotesque';font-size:23px;font-weight:800;letter-spacing:-.6px;line-height:1.12}
+.h2{font-family:'Bricolage Grotesque';font-size:18px;font-weight:700;letter-spacing:-.3px}
+.sub{font-size:12.5px;color:var(--muted);line-height:1.5}
+.eyebrow{font-size:11px;font-weight:700;color:var(--teal);letter-spacing:.3px}
+.ticket{margin:6px 16px;border-radius:24px;background:var(--grad-soft);color:#fff;padding:18px;box-shadow:0 18px 36px -16px rgba(11,165,164,.7);position:relative;overflow:hidden}
+.ticket::after{content:"";position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.12)}
+.ticket .row{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
+.live{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700}
+.dot{position:relative;width:7px;height:7px;border-radius:50%;background:#7CFFC4}
+.dot::after{content:"";position:absolute;inset:0;border-radius:50%;background:#7CFFC4;animation:pulse 1.8s ease-out infinite}
+.num{font-family:'Bricolage Grotesque';font-size:48px;font-weight:800;letter-spacing:-2px;line-height:1.04;margin-top:4px;position:relative;z-index:1}
+.tmeta{display:flex;align-items:center;gap:7px;font-size:12.5px;color:#EAFBF7;margin-top:1px;position:relative;z-index:1}
+.bar{height:6px;border-radius:999px;background:rgba(255,255,255,.25);margin-top:13px;position:relative;z-index:1;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;height:100%;width:62%;border-radius:999px;background:#fff}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:14px 16px}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:17px;padding:13px;box-shadow:var(--card-sh);transition:background .5s,border-color .5s}
+.ic{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;font-size:19px;margin-bottom:9px}
+.tile b{font-size:13px;font-weight:700;letter-spacing:-.1px}
+.tile span{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+.banner{margin:0 16px 12px;border-radius:14px;padding:11px 13px;display:flex;align-items:center;gap:10px;font-size:12.5px}
+.banner.red{background:var(--tint-red);color:var(--on-tint-red)}
+.banner.teal{background:var(--tint-teal);color:var(--on-tint-teal)}
+.banner i{font-size:18px}
+.nav{margin-top:auto;display:flex;justify-content:space-around;align-items:center;padding:12px 0 16px;border-top:1px solid var(--hair);color:var(--faint);background:var(--surface);transition:background .5s}
+.nav i{font-size:23px}
+.nav i.on{color:var(--teal)}
+.fab{position:absolute;right:18px;bottom:84px;width:52px;height:52px;border-radius:18px;background:var(--grad);color:#fff;display:grid;place-items:center;font-size:24px;box-shadow:0 14px 26px -8px rgba(11,165,164,.75);z-index:3}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--grad);color:#fff;font-weight:700;font-size:14px;padding:15px;border-radius:16px;box-shadow:0 14px 26px -10px rgba(11,165,164,.7);border:none}
+.btn.ghost{background:transparent;color:var(--teal);box-shadow:none;border:1.5px solid var(--border)}
+.btn.red{background:linear-gradient(135deg,#EF4444,#DC2626);box-shadow:0 14px 26px -10px rgba(220,38,38,.6)}
+.field{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:14px;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:10px;transition:background .5s,border-color .5s}
+.field.focus{border-color:var(--teal);background:var(--surface);color:var(--ink);box-shadow:0 0 0 3px rgba(11,165,164,.14)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-size:12px;font-weight:600;padding:7px 13px;border-radius:999px;background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.chip.on{background:var(--tint-teal);color:var(--on-tint-teal);border-color:transparent}
+.row{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:15px;background:var(--surface);border:1px solid var(--border);box-shadow:var(--card-sh);transition:background .5s,border-color .5s}
+.row.live-now{border-color:var(--teal);box-shadow:0 0 0 2px rgba(11,165,164,.18)}
+.row .meta{flex:1;min-width:0}
+.row .meta b{font-size:13px;font-weight:700;display:block;letter-spacing:-.1px}
+.row .meta span{font-size:11.5px;color:var(--muted)}
+.tk{font-family:'Bricolage Grotesque';font-weight:800;font-size:15px;color:var(--ink)}
+.badge{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px}
+.badge.amber{background:var(--tint-amber);color:var(--on-tint-amber)}
+.badge.green{background:var(--tint-green);color:var(--on-tint-green)}
+.badge.teal{background:var(--tint-teal);color:var(--on-tint-teal)}
+.badge.red{background:var(--tint-red);color:var(--on-tint-red)}
+.bubble{max-width:80%;padding:10px 13px;border-radius:16px;font-size:12.5px;line-height:1.45}
+.bubble.ai{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:5px;align-self:flex-start}
+.bubble.me{background:var(--grad);color:#fff;border-bottom-right-radius:5px;align-self:flex-end}
+.seg{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:13px;padding:4px}
+.seg div{flex:1;text-align:center;font-size:12.5px;font-weight:700;padding:9px;border-radius:10px;color:var(--muted)}
+.seg div.on{background:var(--surface);color:var(--teal);box-shadow:var(--card-sh)}
+.set{display:flex;align-items:center;gap:13px;padding:14px 4px;border-bottom:1px solid var(--hair)}
+.set i.lead-ic{font-size:21px;color:var(--muted);width:24px;text-align:center}
+.set .t{flex:1}
+.set .t b{font-size:13.5px;font-weight:700;display:block}
+.set .t span{font-size:11.5px;color:var(--muted)}
+.sw{width:46px;height:27px;border-radius:999px;background:var(--surface2);border:1px solid var(--border);position:relative;flex-shrink:0}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;background:var(--faint);transition:.3s}
+.sw.on{background:var(--grad);border-color:transparent}
+.sw.on::after{left:21px;background:#fff}
+.dots{display:flex;gap:6px;justify-content:center}
+.dots i{width:7px;height:7px;border-radius:999px;background:var(--border)}
+.dots i.on{width:22px;background:var(--teal)}
+.illus{flex:1;display:grid;place-items:center}
+.orbit{position:relative;width:118px;height:118px}
+.orbit .core{position:absolute;inset:34px;border-radius:50%;background:var(--grad);display:grid;place-items:center;color:#fff;font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;box-shadow:0 10px 24px -8px rgba(11,165,164,.7)}
+.orbit .ring{position:absolute;inset:0;border:2px dashed var(--border);border-radius:50%;animation:spin 10s linear infinite}
+.orbit .sat{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--amber);top:-2px;left:52px;box-shadow:0 0 0 4px var(--tint-amber)}
+.timeline{display:flex;flex-direction:column;gap:0;padding:0 4px}
+.tl{display:flex;gap:11px}
+.tl .pip{display:flex;flex-direction:column;align-items:center}
+.tl .pip b{width:18px;height:18px;border-radius:50%;background:var(--border);display:grid;place-items:center;font-size:11px;color:#fff}
+.tl.done .pip b{background:var(--green)}
+.tl.now .pip b{background:var(--teal);box-shadow:0 0 0 4px var(--tint-teal)}
+.tl .pip .line{width:2px;flex:1;background:var(--border);margin:2px 0}
+.tl .txt{padding-bottom:14px}
+.tl .txt b{font-size:13px;font-weight:700;display:block}
+.tl .txt span{font-size:11px;color:var(--muted)}
+.vid{flex:1;background:radial-gradient(120% 80% at 50% 30%,#11403C,#06100F);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;position:relative;border-radius:24px;margin:6px}
+.vid .pip{position:absolute;top:14px;right:14px;width:62px;height:84px;border-radius:14px;background:linear-gradient(160deg,#1d5a55,#0c2b28);border:2px solid rgba(255,255,255,.25)}
+.vid .docav{width:78px;height:78px;border-radius:50%;background:rgba(255,255,255,.12);display:grid;place-items:center;font-size:30px;border:2px solid rgba(255,255,255,.3)}
+.ecg{width:120px;height:30px;margin-top:14px}
+.ecg path{fill:none;stroke:#7CFFC4;stroke-width:2.5;stroke-linecap:round;stroke-dasharray:240;stroke-dashoffset:240;animation:draw 2.2s linear infinite}
+.ctrls{position:absolute;bottom:18px;display:flex;gap:14px}
+.ctrls i{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:20px;color:#fff;backdrop-filter:blur(6px)}
+.ctrls i.end{background:#EF4444}
+.choice{display:flex;align-items:center;gap:13px;padding:16px;border:1.5px solid var(--border);border-radius:18px;background:var(--surface);transition:.2s}
+.choice.on{border-color:var(--teal);background:var(--tint-teal)}
+.choice .ic{margin:0}
+.choice b{font-size:14px;font-weight:700}
+.choice span{font-size:11.5px;color:var(--muted);display:block}
+.scrollfade{flex:1;overflow:hidden;position:relative}
+@keyframes pulse{0%{transform:scale(1);opacity:.85}70%{transform:scale(2.8);opacity:0}100%{opacity:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes draw{to{stroke-dashoffset:-240}}
+@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.case:nth-child(1){animation-delay:.02s}.case:nth-child(2){animation-delay:.06s}.case:nth-child(3){animation-delay:.1s}.case:nth-child(4){animation-delay:.14s}.case:nth-child(5){animation-delay:.18s}.case:nth-child(6){animation-delay:.22s}.case:nth-child(7){animation-delay:.26s}.case:nth-child(8){animation-delay:.3s}.case:nth-child(9){animation-delay:.34s}.case:nth-child(10){animation-delay:.38s}.case:nth-child(11){animation-delay:.42s}.case:nth-child(12){animation-delay:.46s}.case:nth-child(13){animation-delay:.5s}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <div class="logo"><i class="ti ti-heartbeat"></i></div>
+      <div><h1 class="disp">ClinicNow</h1><p>Design board · 13 screens · Bricolage + Manrope</p></div>
+    </div>
+    <div class="toggle" onclick="tog()">
+      <span id="tglab">Light</span>
+      <div class="knob"><i class="ti ti-sun" id="tgic"></i></div>
+    </div>
+  </div>
+  <p class="lead">Tap the toggle (top-right) — every screen animates between light and dark together. Hover any phone to lift it. This is the visual reference: match the layout, color, type, and motion per screen when building.</p>
+
+  <div class="gallery">
+
+    <!-- 1 ONBOARDING -->
+    <div class="case"><div class="cap"><b>1 · Onboarding</b><span>First-run intro, not gated by login</span></div>
+    <div class="phone"><div class="scr">
+      <div class="sb"><b class="tab">8:32</b><span><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="ab"><span class="eyebrow">EN · PCM</span><span class="sub">Skip</span></div>
+      <div class="illus"><div class="orbit"><div class="ring"></div><div class="sat"></div><div class="core"><i class="ti ti-vaccine"></i></div></div></div>
+      <div class="pad" style="text-align:center"><div class="h1">Healthcare wey<br>dey your hand</div><p class="sub" style="margin-top:8px">Join queue from house, talk to doctor, set reminder for your pikin immunisation.</p></div>
+      <div class="dots" style="margin:18px 0"><i class="on"></i><i></i><i></i></div>
+      <div class="pad" style="padding-bottom:22px"><div class="btn">Get started <i class="ti ti-arrow-right"></i></div></div>
+    </div></div></div>
+
+    <!-- 2 ROLE SELECT -->
+    <div class="case"><div class="cap"><b>2 · Role select</b><span>Routes patient vs clinic staff</span></div>
+    <div class="phone"><div class="scr">
+      <div class="sb"><b class="tab">8:33</b><span><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="pad" style="margin-top:14px"><div class="h1">You be patient or<br>you dey work here?</div><p class="sub" style="margin-top:8px">We go show you the right screen.</p></div>
+      <div class="pad" style="display:flex;flex-direction:column;gap:13px;margin-top:22px">
+        <div class="choice on"><div class="ic" style="background:var(--tint-teal);color:var(--on-tint-teal)"><i class="ti ti-user-heart"></i></div><div><b>I be patient</b><span>Book, queue, teleconsult</span></div></div>
+        <div class="choice"><div class="ic" style="background:var(--tint-green);color:var(--on-tint-green)"><i class="ti ti-stethoscope"></i></div><div><b>I dey work for clinic</b><span>Manage queue & patients</span></div></div>
+      </div>
+      <div class="pad" style="margin-top:auto;padding-bottom:22px"><div class="btn">Continue <i class="ti ti-arrow-right"></i></div></div>
+    </div></div></div>
+
+    <!-- 3 LOGIN -->
+    <div class="case"><div class="cap"><b>3 · Login / Register</b><span>JWT auth against Spring Boot</span></div>
+    <div class="phone"><div class="scr">
+      <div class="sb"><b class="tab">8:34</b><span><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="ab"><i class="ti ti-arrow-left bk"></i><span></span></div>
+      <div class="pad"><div class="h1">Welcome back</div><p class="sub" style="margin-top:6px">Login to see your queue.</p></div>
+      <div class="pad" style="display:flex;flex-direction:column;gap:12px;margin-top:20px">
+        <div class="field"><i class="ti ti-mail"></i>you@email.com</div>
+        <div class="field focus"><i class="ti ti-lock"></i><span style="flex:1;color:var(--ink)">••••••••</span><i class="ti ti-eye"></i></div>
+        <div style="text-align:right;font-size:12px;color:var(--teal);font-weight:600">Forgot password?</div>
+        <div class="btn" style="margin-top:6px">Login</div>
+      </div>
+      <div class="pad" style="margin-top:auto;padding-bottom:24px;text-align:center"><span class="sub">New here? </span><span style="font-size:13px;color:var(--teal);font-weight:700">Create account</span></div>
+    </div></div></div>
+
+    <!-- 4 NDPA CONSENT -->
+    <div class="case"><div class="cap"><b>4 · NDPA consent</b><span>Granular, never pre-checked</span></div>
+    <div class="phone"><div class="scr">
+      <div class="sb"><b class="tab">8:35</b><span><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="pad" style="margin-top:14px"><div class="ic" style="background:var(--tint-teal);color:var(--on-tint-teal);width:44px;height:44px;font-size:23px"><i class="ti ti-shield-lock"></i></div><div class="h1" style="margin-top:12px">Your data, your<br>control</div><p class="sub" style="margin-top:8px">Choose wetin you gree make we use. You fit change am anytime.</p></div>
+      <div class="pad" style="display:flex;flex-direction:column;gap:0;margin-top:14px">
+        <div class="set"><i class="ti ti-camera lead-ic"></i><div class="t"><b>Camera</b><span>For teleconsult video</span></div><div class="sw"></div></div>
+        <div class="set"><i class="ti ti-microphone lead-ic"></i><div class="t"><b>Microphone</b><span>For voice with doctor</span></div><div class="sw on"></div></div>
+        <div class="set"><i class="ti ti-heart-rate-monitor lead-ic"></i><div class="t"><b>Share health data</b><span>With clinic staff only</span></div><div class="sw"></div></div>
+      </div>
+      <div class="pad" style="margin-top:auto;padding-bottom:22px"><div class="btn">I agree</div><div style="text-align:center;font-size:12px;color:var(--teal);font-weight:600;margin-top:12px">Read privacy policy for Pidgin</div></div>
+    </div></div></div>
+
+    <!-- 5 HOME (premium redesign) -->
+    <div class="case"><div class="cap"><b>5 · Patient home ★</b><span>Premium redesign — ticket hero</span></div>
+    <div class="phone"><div class="scr">
+      <div class="sb"><b class="tab">8:36</b><span><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="ab"><div><p class="sub">Good morning</p><div class="h2">Adaeze</div></div><div style="display:flex;align-items:center;gap:11px"><i class="ti ti-bell" style="font-size:20px;color:var(--muted)"></i><div class="av">AO</div></div></div>
+      <div class="ticket">
+        <div class="row"><span style="font-size:12px;color:#CFF4F0">Your queue ticket</span><span class="live"><span class="dot"></span>Live</span></div>
+        <div class="num tab">A-091</div>
+        <div class="tmeta"><b class="tab">3</b> people ahead <span style="opacity:.5">·</span><i class="ti ti-clock"></i><b class="tab">~22 min</b></div>
+        <div class="bar"><i></i></div>
+      </div>
+      <div class="grid2">
+        <div class="tile"><div class="ic" style="background:var(--tint-teal);color:var(--on-tint-teal)"><i class="ti ti-calendar-event"></i></div><b>Book</b><span>Appointment</span></div>
+        <div class="tile"><div class="ic" style="background:var(--tint-green);color:var(--on-tint-green)"><i class="ti ti-message-chatbot"></i></div><b>Nurse Ada</b><span>Ask anything</span></div>
+        <div class="tile"><div class="ic" style="background:var(--tint-amber);color:var(--on-tint-amber)"><i class="ti ti-video"></i></div><b>Video</b><span>See a doctor</span></div>
+        <div class="tile"><div class="ic" style="background:var(--tint-teal);color:var(--on-tint-teal)"><i class="ti ti-activity-heartbeat"></i></div><b>Symptoms</b><span>Check now</span></div>
+      </div>
+      <div class="banner red"><i class="ti ti-urgent"></i><div><b>Emergency?</b> Call 112 now</div></div>
+      <div class="fab"><i class="ti ti-message-chatbot"></i></div>
+      <div class="nav"><i class="ti ti-home on"></i><i class="ti ti-calendar"></i><i class="ti ti-message-2"></i><i class="ti ti-user"></i></div>
+    </div></div></div>
+
+    <!-- 6 QUEUE TICKET -->
+    <div class="case"><div class="cap"><b>6 · Live queue ticket</b><span>Orbital loader + status timeline</span></div>
+    <div class="phone"><div class="scr">
+      <div class="sb"><b class="tab">8:37</b><span><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="ab"><i class="ti ti-arrow-left bk"></i><span class="live" style="background:var(--tint-teal);color:var(--on-tint-teal)"><span class="dot" style="background:var(--teal)"></span>Live</span></div>
+      <div class="illus" style="flex:none;padding:6px 0 2px"><div class="orbit"><div class="ring"></div><div class="sat"></div><div class="core tab">091</div></div></div>
+      <div class="pad" style="text-align:center"><div class="h1">3 people ahead</div><p class="sub" style="margin-top:4px">Doctor go see you for about 22 min.</p></div>
+      <div class="pad" style="margin-top:16px">
+        <div class="timeline">
+          <div class="tl done"><div class="pip"><b><i class="ti ti-check"></i></b><div class="line"></div></div><div class="txt"><b>Checked in</b><span>8:32 AM</span></div></div>
+          <div class="tl now"><div class="pip"><b></b><div class="line"></div></div><div class="txt"><b>Waiting</b><span>You dey line now</span></div></div>
+          <div class="tl"><div class="pip"><b></b></div><div class="txt"><b>With doctor</b><span>We go buzz you</span></div></div>
+        </div>
+      </div>
+      <div class="pad" style="margin-top:auto;padding-bottom:22px"><div class="btn ghost">Leave queue</div></div>
+    </div></div></div>
+
+    <!-- 7 STAFF BOARD (realtime centerpiece) -->
+    <div class="case"><div class="cap"><b>7 · Staff queue board ★</b><span>Realtime centerpiece — WebSocket</span></div>
+    <div class="phone"><div class="scr">
+      <div class="sb"><b class="tab">8:38</b><span><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="ab"><div><div class="h2">Today's queue</div><p class="sub"><b class="tab" style="color:var(--ink)">12</b> waiting · GOPD</p></div><span class="live" style="background:var(--tint-green);color:var(--on-tint-green)"><span class="dot" style="background:var(--green)"></span>Live</span></div>
+      <div class="pad"><div class="chips"><span class="chip on">All</span><span class="chip">Waiting</span><span class="chip">Called</span></div></div>
+      <div class="pad" style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+        <div class="row live-now"><div class="av" style="background:var(--tint-amber);color:var(--on-tint-amber)">AO</div><div class="meta"><b>Adaeze Okafor</b><span>Follow-up: hypertension</span></div><div style="text-align:right"><div class="tk tab">A-091</div><span class="badge teal">Called</span></div></div>
+        <div class="row"><div class="av">CN</div><div class="meta"><b>Chidi Nwosu</b><span>Malaria test</span></div><div style="text-align:right"><div class="tk tab">A-092</div><span class="badge amber">12m</span></div></div>
+        <div class="row"><div class="av">FB</div><div class="meta"><b>Fatima Bello</b><span>Antenatal</span></div><div style="text-align:right"><div class="tk tab">A-093</div><span class="badge amber">18m</span></div></div>
+        <div class="row"><div class="av">EO</div><div class="meta"><b>Emeka Obi</b><span>BP check</span></div><div style="text-align:right"><div class="tk tab">A-094</div><span class="badge amber">25m</span></div></div>
+      </div>
+      <div class="pad" style="margin-top:auto;padding-bottom:18px"><div class="btn"><i class="ti ti-bell-ringing"></i> Call next</div></div>
+    </div></div></div>
+
+    <!-- 8 NURSE ADA -->
+    <div class="case"><div class="cap"><b>8 · Nurse Ada (AI)</b><span>Gemini + Pidgin + offline fallback</span></div>
+    <div class="phone"><div class="scr">
+      <div class="sb"><b class="tab">8:39</b><span><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="ab"><div style="display:flex;align-items:center;gap:10px"><div class="av" style="background:var(--grad);color:#fff"><i class="ti ti-robot"></i></div><div><b style="font-size:14px;font-weight:700">Nurse Ada</b><p class="sub" style="color:var(--green)">● online</p></div></div><i class="ti ti-volume" style="font-size:20px;color:var(--muted)"></i></div>
+      <div class="pad scrollfade" style="display:flex;flex-direction:column;gap:9px;padding-top:8px">
+        <div class="bubble ai">How your body dey today? Tell me wetin dey worry you.</div>
+        <div class="bubble me">I get fever and my head dey pain me since morning</div>
+        <div class="bubble ai">Sorry o. How many days e don dey? Make I ask you small questions.</div>
+        <div class="chips" style="margin-top:2px"><span class="chip">Today</span><span class="chip">2–3 days</span><span class="chip">Pass 3 days</span></div>
+        <div class="bubble ai" style="font-size:11px;color:var(--muted)">This na guide. If you no sure, go hospital.</div>
+      </div>
+      <div class="pad" style="padding-bottom:16px"><div class="field"><i class="ti ti-microphone" style="color:var(--teal)"></i><span style="flex:1">Type message…</span><i class="ti ti-send" style="color:var(--teal)"></i></div></div>
+    </div></div></div>
+
+    <!-- 9 VIDEO CONSULT -->
+    <div class="case"><div class="cap"><b>9 · Teleconsult</b><span>Agora video + graceful fallback</span></div>
+    <div class="phone"><div class="scr">
+      <div class="vid">
+        <div class="pip"></div>
+        <div class="docav"><i class="ti ti-user"></i></div>
+        <div style="margin-top:12px;font-weight:700">Dr. Bello</div>
+        <div style="font-size:12px;opacity:.8" class="tab">04:12 · connected</div>
+        <svg class="ecg" viewBox="0 0 120 30"><path d="M0 15 H30 l5 -11 l6 22 l5 -11 H62 l5 -7 l5 14 l4 -7 H120"/></svg>
+        <div class="ctrls"><i class="ti ti-microphone"></i><i class="ti ti-video"></i><i class="ti ti-phone end"></i><i class="ti ti-volume"></i></div>
+      </div>
+    </div></div></div>
+
+    <!-- 10 PAYMENT -->
+    <div class="case"><div class="cap"><b>10 · Payment</b><span>Paystack (kobo) · server-verified</span></div>
+    <div class="phone"><div class="scr">
+      <div class="sb"><b class="tab">8:41</b><span><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="ab"><i class="ti ti-arrow-left bk"></i><span></span></div>
+      <div class="pad"><div class="h1">Teleconsult fee</div></div>
+      <div class="pad"><div class="ticket" style="margin:14px 0;text-align:center"><span style="font-size:12px;color:#CFF4F0">Amount to pay</span><div class="num tab" style="font-size:40px">₦2,000</div><span style="font-size:12px;color:#EAFBF7">Dr. Bello · video consult</span></div></div>
+      <div class="pad" style="display:flex;flex-direction:column;gap:10px">
+        <div class="choice on"><div class="ic" style="background:var(--tint-teal);color:var(--on-tint-teal)"><i class="ti ti-credit-card"></i></div><div><b>Card</b><span>Visa, Verve, Mastercard</span></div></div>
+        <div class="choice"><div class="ic" style="background:var(--tint-green);color:var(--on-tint-green)"><i class="ti ti-building-bank"></i></div><div><b>Bank transfer / USSD</b><span>Pay with your bank app</span></div></div>
+      </div>
+      <div class="pad" style="margin-top:auto;padding-bottom:20px"><div class="btn">Pay ₦2,000</div><div style="display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;color:var(--muted);margin-top:11px"><i class="ti ti-lock"></i>Verified on our server, no be client</div></div>
+    </div></div></div>
+
+    <!-- 11 TRIAGE -->
+    <div class="case"><div class="cap"><b>11 · Symptom triage</b><span>7 questions → traffic-light</span></div>
+    <div class="phone"><div class="scr">
+      <div class="sb"><b class="tab">8:42</b><span><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="ab"><i class="ti ti-arrow-left bk"></i><span class="sub tab">3 / 7</span></div>
+      <div class="pad"><div class="bar" style="background:var(--surface2);margin:0"><i style="width:43%;background:var(--grad)"></i></div></div>
+      <div class="pad illus" style="text-align:center"><div><div class="ic" style="background:var(--tint-amber);color:var(--on-tint-amber);width:54px;height:54px;font-size:28px;margin:0 auto 16px"><i class="ti ti-lungs"></i></div><div class="h1">You dey find am hard<br>to breathe?</div><p class="sub" style="margin-top:8px">Answer how you dey feel now.</p></div></div>
+      <div class="pad" style="display:flex;gap:11px;padding-bottom:14px"><div class="btn ghost" style="flex:1">No</div><div class="btn" style="flex:1">Yes</div></div>
+      <div class="banner red" style="margin-bottom:18px"><i class="ti ti-urgent"></i><div><b>Emergency?</b> Call 112 / Lagos 767</div></div>
+    </div></div></div>
+
+    <!-- 12 APPOINTMENTS & REMINDERS -->
+    <div class="case"><div class="cap"><b>12 · Appointments & reminders</b><span>Immunisation / antenatal schedules</span></div>
+    <div class="phone"><div class="scr">
+      <div class="sb"><b class="tab">8:43</b><span><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="ab"><div class="h2">Your schedule</div><i class="ti ti-plus" style="font-size:22px;color:var(--teal)"></i></div>
+      <div class="pad"><div class="seg"><div class="on">Appointments</div><div>Reminders</div></div></div>
+      <div class="pad" style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+        <div class="row"><div class="ic" style="background:var(--tint-green);color:var(--on-tint-green);margin:0"><i class="ti ti-baby-carriage"></i></div><div class="meta"><b>Antenatal — contact 4</b><span>Tue 1 Jul · 9:00 AM · GOPD</span></div><span class="badge green">Soon</span></div>
+        <div class="row"><div class="ic" style="background:var(--tint-teal);color:var(--on-tint-teal);margin:0"><i class="ti ti-vaccine"></i></div><div class="meta"><b>R21 malaria vaccine</b><span>Baby · due at 6 months</span></div><span class="badge amber">3 days</span></div>
+        <div class="row" style="opacity:.7"><div class="ic" style="background:var(--tint-green);color:var(--on-tint-green);margin:0"><i class="ti ti-check"></i></div><div class="meta"><b>BCG at birth</b><span>Given · 12 Jan</span></div><span class="badge green">Done</span></div>
+      </div>
+      <div class="pad" style="margin-top:auto;padding-bottom:18px"><div class="btn"><i class="ti ti-calendar-plus"></i> Book appointment</div></div>
+    </div></div></div>
+
+    <!-- 13 PROFILE & SETTINGS (theme switch) -->
+    <div class="case"><div class="cap"><b>13 · Profile & settings ★</b><span>Animated dark-mode switch lives here</span></div>
+    <div class="phone"><div class="scr">
+      <div class="sb"><b class="tab">8:44</b><span><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="pad" style="text-align:center;margin-top:16px"><div class="av" style="width:66px;height:66px;font-size:22px;margin:0 auto"><i class="ti ti-user"></i></div><div class="h2" style="margin-top:10px">Adaeze Okafor</div><p class="sub">Patient · Hygeia HMO</p></div>
+      <div class="pad" style="margin-top:10px">
+        <div class="set"><i class="ti ti-language lead-ic"></i><div class="t"><b>Language</b></div><div class="seg" style="width:110px;padding:3px"><div class="on" style="padding:6px">EN</div><div style="padding:6px">PCM</div></div></div>
+        <div class="set" style="background:var(--tint-teal);border-radius:14px;padding:14px 12px;border-bottom:none"><i class="ti ti-moon lead-ic" style="color:var(--on-tint-teal)"></i><div class="t"><b>Dark mode</b><span>Smooth animated switch</span></div><div class="sw on"></div></div>
+        <div class="set"><i class="ti ti-volume lead-ic"></i><div class="t"><b>Read aloud</b><span>For every screen</span></div><div class="sw on"></div></div>
+        <div class="set"><i class="ti ti-download lead-ic"></i><div class="t"><b>Export my data</b><span>JSON + PDF</span></div><i class="ti ti-chevron-right" style="color:var(--faint)"></i></div>
+        <div class="set" style="border-bottom:none"><i class="ti ti-trash lead-ic" style="color:var(--red)"></i><div class="t"><b style="color:var(--red)">Delete account</b></div></div>
+      </div>
+      <div class="nav"><i class="ti ti-home"></i><i class="ti ti-calendar"></i><i class="ti ti-message-2"></i><i class="ti ti-user on"></i></div>
+    </div></div></div>
+
+  </div>
+</div>
+<script>
+function tog(){
+  var d=document.documentElement;
+  var dark=d.getAttribute('data-theme')==='dark';
+  d.setAttribute('data-theme',dark?'light':'dark');
+  document.getElementById('tglab').textContent=dark?'Light':'Dark';
+  document.getElementById('tgic').className=dark?'ti ti-sun':'ti ti-moon';
+}
+</script>
+</body>
+</html>

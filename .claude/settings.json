@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(Get-Content *)",
+      "PowerShell(Test-Path *)",
+      "PowerShell(Get-Process *)",
+      "PowerShell(Get-Item *)",
+      "PowerShell(where.exe *)",
+      "PowerShell(Get-WmiObject *)",
+      "PowerShell(Get-ExecutionPolicy *)",
+      "PowerShell(Get-Command *)",
+      "PowerShell(flutter doctor *)",
+      "Bash(adb devices)",
+      "Bash(adb -s * shell getprop *)",
+      "Bash(adb -s * shell pm list *)"
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "dart.flutterSdkPath": "F:\\",
+  "dart.sdkPath": "F:\\bin\\cache\\dart-sdk",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit"
+  },
+  "java.import.exclusions": [
+    "**/android/**",
+    "**/build/**",
+    "**/.dart_tool/**",
+    "**/ios/**"
+  ],
+  "java.autobuild.enabled": false,
+  "java.configuration.detectJdksAtStart": false,
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.selectionHighlight": false,
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    "editor.suggestSelection": "first",
+    "editor.tabCompletion": "onlySnippets",
+    "editor.wordBasedSuggestions": "off"
+  },
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "terminal.integrated.profiles.windows": {
+    "ClinicNow PowerShell": {
+      "source": "PowerShell",
+      "args": [
+        "-NoExit",
+        "-Command",
+        "if (-not (Test-Path 'F:\\')) { subst F: 'C:\\Users\\DELL GAMING\\Documents\\flutter_windows_3.41.5-stable\\flutter' }; if (-not (Test-Path 'C:\\pc')) { cmd /c mklink /J C:\\pc 'C:\\Users\\DELL GAMING\\AppData\\Local\\Pub\\Cache' | Out-Null }; $env:PUB_CACHE='C:\\pc'; $env:JAVA_HOME='C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.11.10-hotspot'; $env:Path = 'F:\\bin;' + $env:Path; Write-Host '✔ ClinicNow env ready  (flutter run works here)' -ForegroundColor Green"
+      ]
+    }
+  },
+  "terminal.integrated.defaultProfile.windows": "ClinicNow PowerShell"
+}
