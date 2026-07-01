@@ -32,5 +32,6 @@
       ]
     }
   },
-  "terminal.integrated.defaultProfile.windows": "ClinicNow PowerShell"
+  "terminal.integrated.defaultProfile.windows": "ClinicNow PowerShell",
+  "gitdoc.enabled": true
 }
