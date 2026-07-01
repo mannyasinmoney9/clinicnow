@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/network/health_provider.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/connection_banner.dart';
 import '../../../shared/widgets/error_state.dart';
 import '../../../shared/widgets/primary_button.dart';
 import '../../auth/presentation/auth_providers.dart';
@@ -75,20 +78,35 @@ class _PatientQueuePageState extends ConsumerState<PatientQueuePage>
         backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
       ),
-      body: switch (myEntry) {
-        MyEntryNone() => _JoinView(onJoin: _join),
-        MyEntryLoading() => const Center(child: CircularProgressIndicator()),
-        MyEntryError(message: final msg) => ErrorState(
-            message: msg,
-            onRetry: _join,
+      body: Column(
+        children: [
+          const ConnectionBanner(),
+          Expanded(
+            child: RefreshIndicator(
+              color: AppColors.trustTeal,
+              onRefresh: () async {
+                ref.invalidate(queueSnapshotProvider(widget.clinicId));
+                await ref.read(healthProvider.notifier).check();
+              },
+              child: switch (myEntry) {
+                MyEntryNone() => _JoinView(onJoin: _join),
+                MyEntryLoading() =>
+                  const Center(child: CircularProgressIndicator()),
+                MyEntryError(message: final msg) => ErrorState(
+                    message: msg,
+                    onRetry: _join,
+                  ),
+                MyEntryData(entry: final entry) => _InQueueView(
+                    entry: entry,
+                    tokenCtrl: _tokenCtrl,
+                    orbitCtrl: _orbitCtrl,
+                    snapshot: snapshotAsync.value,
+                  ),
+              },
+            ),
           ),
-        MyEntryData(entry: final entry) => _InQueueView(
-            entry: entry,
-            tokenCtrl: _tokenCtrl,
-            orbitCtrl: _orbitCtrl,
-            snapshot: snapshotAsync.value,
-          ),
-      },
+        ],
+      ),
     );
   }
 }
