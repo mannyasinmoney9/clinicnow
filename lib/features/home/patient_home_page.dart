@@ -43,7 +43,7 @@ class _PatientHomePageState extends ConsumerState<PatientHomePage>
     final authState = ref.watch(authProvider);
     final user =
         authState is AuthAuthenticated ? authState.user : null;
-    final s = context.strings;
+
 
     return Scaffold(
       body: Stack(
