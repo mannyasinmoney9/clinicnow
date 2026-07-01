@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart' show DioException;
+import 'package:dio/dio.dart' show DioException, DioExceptionType;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
 import '../data/auth_repository.dart';
@@ -121,12 +121,27 @@ class AuthNotifier extends StateNotifier<AuthState> {
     if (data is Map<String, dynamic>) {
       return (data['message'] ?? data['error'] ?? 'Server error').toString();
     }
-    if (e.type.name.contains('connection') ||
-        e.type.name.contains('timeout') ||
-        e.type.name.contains('receive')) {
-      return 'Cannot reach server — make sure backend is running and you\'re on the same network';
+    switch (e.type) {
+      case DioExceptionType.connectionError:
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+        return 'Server unreachable — make sure the backend is running';
+      case DioExceptionType.badResponse:
+        final code = e.response?.statusCode ?? '?';
+        return 'Server error ($code) — try again';
+      case DioExceptionType.cancel:
+        return 'Request cancelled — try again';
+      default:
+        final msg = (e.message ?? '').toLowerCase();
+        if (msg.contains('socket') ||
+            msg.contains('refused') ||
+            msg.contains('failed host') ||
+            msg.contains('network')) {
+          return 'Server unreachable — make sure the backend is running';
+        }
+        return 'Network error — check your connection';
     }
-    return e.message ?? 'Network error — check connection';
   }
 }
 
