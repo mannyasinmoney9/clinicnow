@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_back_button.dart';
 import 'auth_providers.dart';
 
 class OtpPage extends ConsumerStatefulWidget {
@@ -149,13 +150,20 @@ class _OtpPageState extends ConsumerState<OtpPage>
             ),
           ),
 
+          // Back button overlay (top-left, styled for dark background)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            left: 8,
+            child: const AppBackButtonDark(),
+          ),
+
           SafeArea(
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 28),
                 child: Column(
                   children: [
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 56), // extra space so content clears the back button
 
                     // Icon
                     Container(
