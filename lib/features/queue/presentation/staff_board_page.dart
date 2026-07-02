@@ -25,6 +25,7 @@ class StaffBoardPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: const AppBackButton(),
         title: const Text('Queue Board'),
         actions: [
           _LiveIndicator(connected: isLive),
