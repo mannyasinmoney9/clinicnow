@@ -45,10 +45,34 @@ function Start-Backend {
 
 function Start-Flutter([string]$apiUrl, [string]$device) {
     Write-Host "Running Flutter (API=$apiUrl)..." -ForegroundColor Cyan
+
+    # Load .env if present (optional — values can also be set in the shell before running)
+    $envFile = Join-Path $PSScriptRoot ".env"
+    if (Test-Path $envFile) {
+        Get-Content $envFile | ForEach-Object {
+            if ($_ -match '^\s*([^#][^=]+)=(.*)$') {
+                [System.Environment]::SetEnvironmentVariable($matches[1].Trim(), $matches[2].Trim())
+            }
+        }
+    }
+
+    $AGORA_APP_ID        = $env:AGORA_APP_ID        ?? "8be3ac62ad80495886db03d0e99d426f"
+    $EMAILJS_SERVICE_ID  = $env:EMAILJS_SERVICE_ID  ?? ""
+    $EMAILJS_TEMPLATE_ID = $env:EMAILJS_TEMPLATE_ID ?? ""
+    $EMAILJS_PUBLIC_KEY  = $env:EMAILJS_PUBLIC_KEY  ?? ""
+
+    $defines = @(
+        "--dart-define=API_BASE_URL=$apiUrl",
+        "--dart-define=AGORA_APP_ID=$AGORA_APP_ID",
+        "--dart-define=EMAILJS_SERVICE_ID=$EMAILJS_SERVICE_ID",
+        "--dart-define=EMAILJS_TEMPLATE_ID=$EMAILJS_TEMPLATE_ID",
+        "--dart-define=EMAILJS_PUBLIC_KEY=$EMAILJS_PUBLIC_KEY"
+    )
+
     if ($device) {
-        & "F:\bin\flutter.bat" run -d $device "--dart-define=API_BASE_URL=$apiUrl"
+        & "F:\bin\flutter.bat" run -d $device @defines
     } else {
-        & "F:\bin\flutter.bat" run "--dart-define=API_BASE_URL=$apiUrl"
+        & "F:\bin\flutter.bat" run @defines
     }
 }
 
