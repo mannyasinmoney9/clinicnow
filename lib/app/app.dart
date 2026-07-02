@@ -38,7 +38,4 @@ class ClinicNowApp extends ConsumerWidget {
   }
 }
 
-void configureApp() {
-  // Fonts are fetched from Google CDN on first run and cached on-device.
-  // No need to set allowRuntimeFetching = false until .ttf files are bundled.
-}
+void configureApp() {}
