@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart' show DioException, DioExceptionType;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/services/emailjs_service.dart';
 import '../data/auth_repository.dart';
 import '../domain/user_model.dart';
 
@@ -87,9 +88,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
         phone: phone,
         role: role,
       );
+      // Send real OTP email via EmailJS (non-blocking — never fails registration)
+      if (result.otpCode != null) {
+        EmailJsService.sendOtp(
+          toEmail: email,
+          toName: fullName,
+          otpCode: result.otpCode!,
+        );
+      }
       // Navigate to OTP verification — do NOT authenticate yet
-      state = AuthRegistered(
-          email: email, otpCode: result.otpCode);
+      state = AuthRegistered(email: email, otpCode: result.otpCode);
     } on DioException catch (e) {
       state = AuthError(_dioMsg(e));
     } on Exception catch (e) {
