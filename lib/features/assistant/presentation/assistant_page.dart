@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_back_button.dart';
 import '../domain/chat_message.dart';
 import 'assistant_providers.dart';
 
@@ -70,6 +71,7 @@ class _AssistantPageState extends ConsumerState<AssistantPage> {
     return Scaffold(
       backgroundColor: cs.surfaceContainerLow,
       appBar: AppBar(
+        leading: const AppBackButton(),
         title: Row(
           children: [
             CircleAvatar(
