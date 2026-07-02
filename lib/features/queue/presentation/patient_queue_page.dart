@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/health_provider.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_back_button.dart';
 import '../../../shared/widgets/connection_banner.dart';
 import '../../../shared/widgets/error_state.dart';
 import '../../../shared/widgets/primary_button.dart';
@@ -74,6 +75,7 @@ class _PatientQueuePageState extends ConsumerState<PatientQueuePage>
     return Scaffold(
       backgroundColor: cs.surface,
       appBar: AppBar(
+        leading: const AppBackButton(),
         title: Text(widget.clinicName, style: tt.titleMedium),
         backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
