@@ -259,7 +259,7 @@ class _NotificationOverlayState extends ConsumerState<_NotificationOverlay>
                             padding: const EdgeInsets.fromLTRB(0, 0, 0, 12),
                             shrinkWrap: true,
                             itemCount: notifications.length,
-                            separatorBuilder: (_, __) => Divider(
+                            separatorBuilder: (_, i) => Divider(
                               height: 1,
                               color: cs.outlineVariant.withAlpha(80),
                               indent: 16,
