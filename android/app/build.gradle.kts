@@ -7,8 +7,8 @@ plugins {
 
 android {
     namespace = "com.example.clinic_now"
-    compileSdk = 35
-    ndkVersion = "27.0.12077973"   // required by agora_rtc_engine 6.x
+    compileSdk = 36
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
