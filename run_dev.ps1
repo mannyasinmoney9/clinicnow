@@ -18,6 +18,10 @@ $BACKEND_DIR  = "C:\Users\DELL GAMING\Desktop\ClinicNow2\backend"
 $env:JAVA_HOME = $JAVA_HOME
 $env:Path = "$JAVA_HOME\bin;$env:Path"
 
+# ---- Silence Flutter analytics (stops "network path not available" noise) ----
+$env:FLUTTER_SUPPRESS_ANALYTICS = "1"
+$env:DART_SUPPRESS_ANALYTICS = "1"
+
 # ---- Fix: map F: drive (no spaces in Flutter path) ----
 if (-not (Test-Path "F:\")) {
     subst F: $FLUTTER_SDK
