@@ -91,6 +91,7 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
               ],
             ),
           ),
+          const NotificationBell(),
           PopupMenuButton<String>(
             onSelected: (v) async {
               if (v == 'logout') {
