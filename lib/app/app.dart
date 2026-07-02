@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../core/l10n/pcm_delegate.dart';
 import '../core/theme/app_theme.dart';
@@ -40,6 +39,6 @@ class ClinicNowApp extends ConsumerWidget {
 }
 
 void configureApp() {
-  // Disable network font fetching — fonts are bundled as assets for offline demo
-  GoogleFonts.config.allowRuntimeFetching = false;
+  // Fonts are fetched from Google CDN on first run and cached on-device.
+  // No need to set allowRuntimeFetching = false until .ttf files are bundled.
 }
