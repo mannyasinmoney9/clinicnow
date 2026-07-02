@@ -155,7 +155,7 @@ class _PatientHomePageState extends ConsumerState<PatientHomePage>
                               label: 'Video Consult',
                               subtitle: 'See a doctor now',
                               color: const Color(0xFF7C3AED),
-                              onTap: () {},
+                              onTap: () => context.go('/teleconsult'),
                               index: 2,
                             ),
                             _ActionCard(

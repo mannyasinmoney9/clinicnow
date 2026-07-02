@@ -1,0 +1,3 @@
+-keep class io.agora.**{ *; }
+-keep class com.android.billingclient.**{ *; }
+-dontwarn io.agora.**

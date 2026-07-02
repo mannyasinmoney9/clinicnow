@@ -56,7 +56,7 @@ dependencies:
   permission_handler: ^12.0.3
   flutter_tts: ^4.2.5
   paystack_for_flutter: ^1.0.4
-  # agora_rtc_engine added back in Phase 4 (Teleconsult) with NDK fixes
+  agora_rtc_engine: ^6.3.2
   riverpod_annotation: ^2.6.1
 
 dev_dependencies:

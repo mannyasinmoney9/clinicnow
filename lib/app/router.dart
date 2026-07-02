@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/assistant/presentation/assistant_page.dart';
+import '../features/teleconsult/presentation/teleconsult_page.dart';
 import '../features/auth/presentation/auth_providers.dart';
 import '../features/auth/presentation/login_page.dart';
 import '../features/auth/presentation/otp_page.dart';
@@ -145,6 +146,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/assistant',
         builder: (_, _) => const AssistantPage(),
+      ),
+      GoRoute(
+        path: '/teleconsult',
+        builder: (_, state) {
+          final asStaff =
+              (state.extra as Map<String, dynamic>?)?['asStaff'] as bool? ??
+              false;
+          return TeleconsultPage(asStaff: asStaff);
+        },
       ),
     ],
   );

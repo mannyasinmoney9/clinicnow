@@ -96,6 +96,18 @@ class StaffHomePage extends ConsumerWidget {
               icon: const Icon(Icons.open_in_new_rounded),
               label: const Text('Open Live Queue Board'),
             ).animate().fadeIn(delay: 300.ms, duration: 400.ms),
+            const SizedBox(height: AppSpacing.md),
+            FilledButton.icon(
+              onPressed: () => context.go(
+                '/teleconsult',
+                extra: {'asStaff': true},
+              ),
+              icon: const Icon(Icons.video_call_rounded),
+              label: const Text('Join Video Consult'),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF7C3AED),
+              ),
+            ).animate().fadeIn(delay: 380.ms, duration: 400.ms),
           ],
         ),
         ),  // SingleChildScrollView
