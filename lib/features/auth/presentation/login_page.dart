@@ -48,6 +48,13 @@ class _LoginPageState extends ConsumerState<LoginPage>
   bool _consentData = false;
   bool _consentMarketing = false;
 
+  // Per-tab loading/error state — prevents login errors leaking into signup tab
+  String? _loginError;
+  String? _signupError;
+  bool _loginLoading = false;
+  bool _signupLoading = false;
+  int _lastSubmitTab = 0; // which tab most recently submitted
+
   @override
   void initState() {
     super.initState();
@@ -60,6 +67,10 @@ class _LoginPageState extends ConsumerState<LoginPage>
     _glowCtrl = AnimationController(vsync: this, duration: 1800.ms)
       ..repeat(reverse: true);
     _loadSavedCredentials();
+    // Clear error banners when user switches tabs
+    _tabCtrl.addListener(() {
+      if (mounted) setState(() { _loginError = null; _signupError = null; });
+    });
   }
 
   Future<void> _loadSavedCredentials() async {
@@ -91,6 +102,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
   void _submitLogin() {
     if (!_loginFormKey.currentState!.validate()) return;
+    setState(() { _loginLoading = true; _loginError = null; _lastSubmitTab = 0; });
     ref
         .read(authProvider.notifier)
         .login(_loginEmailCtrl.text.trim(), _loginPassCtrl.text);
@@ -106,6 +118,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       );
       return;
     }
+    setState(() { _signupLoading = true; _signupError = null; _lastSubmitTab = 1; });
     ref
         .read(authProvider.notifier)
         .register(
@@ -122,19 +135,29 @@ class _LoginPageState extends ConsumerState<LoginPage>
     ref.listen<AuthState>(authProvider, (_, next) {
       if (!context.mounted) return;
       if (next is AuthAuthenticated) {
+        setState(() { _loginLoading = false; _signupLoading = false; });
         _routeByRole(next);
-      }
-      if (next is AuthRegistered) {
+      } else if (next is AuthRegistered) {
+        setState(() { _signupLoading = false; });
         context.go(
           '/otp',
           extra: {'email': next.email, 'otpCode': next.otpCode},
         );
+      } else if (next is AuthError) {
+        setState(() {
+          if (_lastSubmitTab == 0) {
+            _loginLoading = false;
+            _loginError = next.message;
+          } else {
+            _signupLoading = false;
+            _signupError = next.message;
+          }
+        });
+      } else if (next is AuthUnauthenticated) {
+        setState(() { _loginLoading = false; _signupLoading = false; });
       }
     });
 
-    final authState = ref.watch(authProvider);
-    final isLoading = authState is AuthLoading;
-    final errorMsg = authState is AuthError ? authState.message : null;
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -187,8 +210,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
                   onToggleObscure: () =>
                       setState(() => _loginObscure = !_loginObscure),
                   onSubmit: _submitLogin,
-                  isLoading: isLoading,
-                  errorMsg: errorMsg,
+                  isLoading: _loginLoading,
+                  errorMsg: _loginError,
                   hasSavedCreds: _hasSavedCreds,
                   savedEmail: _savedEmail,
                   onSignUpTap: () => _tabCtrl.animateTo(1),
@@ -212,8 +235,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
                   onConsentMarketing: (v) =>
                       setState(() => _consentMarketing = v),
                   onSubmit: _submitRegister,
-                  isLoading: isLoading,
-                  errorMsg: errorMsg,
+                  isLoading: _signupLoading,
+                  errorMsg: _signupError,
                   onLoginTap: () => _tabCtrl.animateTo(0),
                 ),
               ],
