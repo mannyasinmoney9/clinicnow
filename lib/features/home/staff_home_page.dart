@@ -8,6 +8,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/widgets/signature_widgets.dart';
 import '../../shared/widgets/connection_banner.dart';
+import '../../shared/widgets/notification_bell.dart';
 import '../auth/presentation/auth_providers.dart';
 
 class StaffHomePage extends ConsumerWidget {
@@ -23,6 +24,7 @@ class StaffHomePage extends ConsumerWidget {
       appBar: AppBar(
         title: Text('Staff — ${user?.firstName ?? ''}'),
         actions: [
+          const NotificationBell(),
           const LivePill(),
           const SizedBox(width: AppSpacing.sm),
           PopupMenuButton<String>(

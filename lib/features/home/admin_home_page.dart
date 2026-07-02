@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/network/api_client.dart';
 import '../../core/theme/app_theme.dart';
+import '../../shared/widgets/notification_bell.dart';
 import '../auth/presentation/auth_providers.dart';
 
 class AdminHomePage extends ConsumerStatefulWidget {

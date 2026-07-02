@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/network/health_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../shared/widgets/connection_banner.dart';
+import '../../shared/widgets/notification_bell.dart';
 import '../auth/presentation/auth_providers.dart';
 
 class PatientHomePage extends ConsumerStatefulWidget {
@@ -244,10 +245,7 @@ class _HomeAppBar extends StatelessWidget {
               ],
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {},
-          ),
+          const NotificationBell(),
           PopupMenuButton<String>(
             onSelected: (v) {
               if (v == 'logout') onLogout();
