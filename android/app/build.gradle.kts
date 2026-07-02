@@ -22,7 +22,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.clinic_now"
-        minSdk = 21                                    // Agora RTCEngine requires API 21+
+        minSdk = flutter.minSdkVersion                                    // Agora RTCEngine requires API 21+
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
