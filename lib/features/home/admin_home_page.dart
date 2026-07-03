@@ -3,7 +3,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/config/app_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/signature_widgets.dart';
 import '../../shared/providers/theme_provider.dart';
@@ -11,6 +10,7 @@ import '../../shared/widgets/coming_soon_sheet.dart';
 import '../../shared/widgets/notification_bell.dart';
 import '../auth/presentation/auth_providers.dart';
 import '../queue/presentation/queue_providers.dart';
+import 'animated_menu_button.dart';
 
 class AdminHomePage extends ConsumerStatefulWidget {
   const AdminHomePage({super.key});
@@ -19,38 +19,29 @@ class AdminHomePage extends ConsumerStatefulWidget {
   ConsumerState<AdminHomePage> createState() => _AdminHomePageState();
 }
 
-class _AdminHomePageState extends ConsumerState<AdminHomePage> {
-  int _waitingCount = 0;
-  int _seenToday = 0;
-  bool _loaded = false;
+class _AdminHomePageState extends ConsumerState<AdminHomePage>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _glowCtrl;
 
   @override
   void initState() {
     super.initState();
-    _loadStats();
+    _glowCtrl = AnimationController(vsync: this, duration: 3000.ms)
+      ..repeat(reverse: true);
   }
 
-  Future<void> _loadStats() async {
-    try {
-      final repo = ref.read(queueRepositoryProvider);
-      final list = await repo.clinicQueue(1);
-      if (!mounted) return;
-      setState(() {
-        _waitingCount = list.where((e) => e.isWaiting).length;
-        _seenToday = list.where((e) => e.status == 'SEEN').length;
-        _loaded = true;
-      });
-    } catch (_) {
-      if (mounted) setState(() => _loaded = true);
-    }
+  @override
+  void dispose() {
+    _glowCtrl.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
-    final user =
-        authState is AuthAuthenticated ? authState.user : null;
+    final user = authState is AuthAuthenticated ? authState.user : null;
     final themeMode = ref.watch(themeModeProvider);
+    final snapshotAsync = ref.watch(queueSnapshotProvider(1));
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -63,35 +54,43 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
             Text(user?.email ?? '',
                 style: TextStyle(
                     fontSize: 11,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurfaceVariant)),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant)),
           ],
         ),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.nairaGreen.withAlpha(20),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                  color: AppColors.nairaGreen.withAlpha(60)),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.shield_rounded,
-                    size: 12, color: AppColors.nairaGreen),
-                SizedBox(width: 4),
-                Text('Admin',
-                    style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.nairaGreen,
-                        fontWeight: FontWeight.w700)),
-              ],
-            ),
+          AnimatedBuilder(
+            animation: _glowCtrl,
+            builder: (_, child) {
+              final glow = 0.2 + 0.15 * _glowCtrl.value;
+              return Container(
+                margin: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.emergencyRed.withAlpha(20),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.emergencyRed.withAlpha(60)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.emergencyRed.withAlpha((glow * 255).toInt()),
+                      blurRadius: 8,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.shield_rounded, size: 12, color: AppColors.emergencyRed),
+                    SizedBox(width: 4),
+                    Text('Admin',
+                        style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.emergencyRed,
+                            fontWeight: FontWeight.w700)),
+                  ],
+                ),
+              );
+            },
           ),
           ThemeToggle(
             isDark: themeMode == ThemeMode.dark,
@@ -101,24 +100,30 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
           ),
           const SizedBox(width: 4),
           const NotificationBell(),
-          PopupMenuButton<String>(
+          AnimatedMenuButton(
             onSelected: (v) async {
               if (v == 'profile') context.go('/profile');
+              if (v == 'system-status') context.go('/system-status');
+              if (v == 'settings') context.go('/profile');
+              if (v == 'about') {
+                ComingSoonSheet.show(
+                  context,
+                  title: 'About ClinicNow',
+                  subtitle: 'ClinicNow v1.0.0-alpha — Real-time queue management for Nigerian clinics.',
+                  icon: Icons.info_outline_rounded,
+                );
+              }
               if (v == 'logout') {
                 await ref.read(authProvider.notifier).logout();
                 if (!context.mounted) return;
                 context.go('/login');
               }
             },
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: 'profile', child: Text('Profile')),
-              PopupMenuItem(value: 'logout', child: Text('Logout')),
-            ],
           ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: _loadStats,
+        onRefresh: () async => ref.invalidate(queueSnapshotProvider(1)),
         color: AppColors.trustTeal,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -126,39 +131,45 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Stats
               Text('Live Overview',
                       style: context.text.titleMedium
                           ?.copyWith(fontWeight: FontWeight.w700))
                   .animate()
                   .fadeIn(duration: 400.ms),
               const SizedBox(height: 14),
-              Row(
-                children: [
-                  _StatCard(
-                    label: 'Waiting',
-                    value: _loaded ? '$_waitingCount' : '...',
-                    icon: Icons.people_outline_rounded,
-                    color: AppColors.waitAmber,
-                    index: 0,
-                  ),
-                  const SizedBox(width: 12),
-                  _StatCard(
-                    label: 'Seen today',
-                    value: _loaded ? '$_seenToday' : '...',
-                    icon: Icons.check_circle_outline_rounded,
-                    color: AppColors.nairaGreen,
-                    index: 1,
-                  ),
-                  const SizedBox(width: 12),
-                  _StatCard(
-                    label: 'Clinics',
-                    value: '5',
-                    icon: Icons.local_hospital_rounded,
-                    color: AppColors.trustTeal,
-                    index: 2,
-                  ),
-                ],
+              snapshotAsync.when(
+                loading: () => Row(
+                  children: [
+                    _StatCard(label: 'Waiting', value: '...', icon: Icons.people_outline_rounded, color: AppColors.waitAmber, index: 0),
+                    const SizedBox(width: 12),
+                    _StatCard(label: 'Called', value: '...', icon: Icons.campaign_rounded, color: AppColors.trustTeal, index: 1),
+                    const SizedBox(width: 12),
+                    _StatCard(label: 'Seen', value: '...', icon: Icons.check_circle_outline_rounded, color: AppColors.nairaGreen, index: 2),
+                  ],
+                ),
+                error: (_, _) => Row(
+                  children: [
+                    _StatCard(label: 'Waiting', value: '0', icon: Icons.people_outline_rounded, color: AppColors.waitAmber, index: 0),
+                    const SizedBox(width: 12),
+                    _StatCard(label: 'Called', value: '0', icon: Icons.campaign_rounded, color: AppColors.trustTeal, index: 1),
+                    const SizedBox(width: 12),
+                    _StatCard(label: 'Seen', value: '0', icon: Icons.check_circle_outline_rounded, color: AppColors.nairaGreen, index: 2),
+                  ],
+                ),
+                data: (snapshot) {
+                  final waiting = snapshot.entries.where((e) => e.isWaiting).length;
+                  final called = snapshot.entries.where((e) => e.isCalled).length;
+                  final seen = snapshot.entries.where((e) => e.status == 'SEEN').length;
+                  return Row(
+                    children: [
+                      _StatCard(label: 'Waiting', value: '$waiting', icon: Icons.people_outline_rounded, color: AppColors.waitAmber, index: 0),
+                      const SizedBox(width: 12),
+                      _StatCard(label: 'Called', value: '$called', icon: Icons.campaign_rounded, color: AppColors.trustTeal, index: 1),
+                      const SizedBox(width: 12),
+                      _StatCard(label: 'Seen', value: '$seen', icon: Icons.check_circle_outline_rounded, color: AppColors.nairaGreen, index: 2),
+                    ],
+                  );
+                },
               ),
 
               const SizedBox(height: 28),
@@ -186,41 +197,36 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
                     index: 0,
                   ),
                   _ActionTile(
+                    icon: Icons.system_update_rounded,
+                    label: 'System Status',
+                    subtitle: 'Health & diagnostics',
+                    color: AppColors.nairaGreen,
+                    onTap: () => context.go('/system-status'),
+                    index: 1,
+                  ),
+                  _ActionTile(
                     icon: Icons.people_rounded,
                     label: 'Staff',
                     subtitle: 'Manage team',
-                    color: AppColors.nairaGreen,
+                    color: const Color(0xFF7C3AED),
                     onTap: () => ComingSoonSheet.show(
                       context,
                       title: 'Staff management',
                       subtitle: 'Add, assign, and manage staff accounts from here once the backend is connected.',
                       icon: Icons.people_rounded,
                     ),
-                    index: 1,
+                    index: 2,
                   ),
                   _ActionTile(
                     icon: Icons.bar_chart_rounded,
                     label: 'Reports',
                     subtitle: 'Patient analytics',
-                    color: const Color(0xFF7C3AED),
+                    color: AppColors.waitAmber,
                     onTap: () => ComingSoonSheet.show(
                       context,
                       title: 'Reports & analytics',
                       subtitle: 'Hourly throughput, symptom mix, and trend charts are on the roadmap.',
                       icon: Icons.bar_chart_rounded,
-                    ),
-                    index: 2,
-                  ),
-                  _ActionTile(
-                    icon: Icons.local_hospital_outlined,
-                    label: 'Clinics',
-                    subtitle: 'Manage locations',
-                    color: AppColors.waitAmber,
-                    onTap: () => ComingSoonSheet.show(
-                      context,
-                      title: 'Clinic locations',
-                      subtitle: 'Add and manage clinic branches once the backend is connected.',
-                      icon: Icons.local_hospital_outlined,
                     ),
                     index: 3,
                   ),
@@ -235,49 +241,14 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
                   .animate()
                   .fadeIn(delay: 350.ms, duration: 400.ms),
               const SizedBox(height: 12),
-              ..._demoAccounts.map(
-                (acc) => _AccountRow(
-                  email: acc.$1,
-                  role: acc.$2,
-                  password: acc.$3,
+              ..._demoAccounts.asMap().entries.map(
+                (e) => _AccountRow(
+                  email: e.value.$1,
+                  role: e.value.$2,
+                  password: e.value.$3,
                 ).animate().fadeIn(
-                    delay: Duration(
-                        milliseconds:
-                            400 + _demoAccounts.indexOf(acc) * 60),
+                    delay: Duration(milliseconds: 400 + e.key * 60),
                     duration: 400.ms),
-              ),
-
-              const SizedBox(height: 28),
-
-              Text('System Status',
-                      style: context.text.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w700))
-                  .animate()
-                  .fadeIn(delay: 500.ms, duration: 400.ms),
-              const SizedBox(height: 12),
-              _StatusRow(
-                label: 'Backend API',
-                status: AppConfig.demoMode ? 'Demo mode (local)' : 'Online',
-                ok: true,
-                index: 0,
-              ),
-              _StatusRow(
-                label: 'Live queue engine',
-                status: AppConfig.demoMode ? 'Ticking locally' : 'Connected (STOMP)',
-                ok: true,
-                index: 1,
-              ),
-              _StatusRow(
-                label: 'Accounts',
-                status: AppConfig.demoMode ? 'On-device store' : 'H2 Database',
-                ok: true,
-                index: 2,
-              ),
-              _StatusRow(
-                label: 'Nurse Ada',
-                status: AppConfig.demoMode ? 'Offline scripted engine' : 'Check GEMINI_API_KEY',
-                ok: true,
-                index: 3,
               ),
 
               const SizedBox(height: 32),
@@ -289,9 +260,9 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
   }
 
   static const _demoAccounts = [
-    ('manniboh@gmail.com', 'ADMIN', 'dylan/px4tm'),
-    ('staff@clinicnow.demo', 'STAFF', 'Password123'),
-    ('patient@clinicnow.demo', 'PATIENT', 'Password123'),
+    ('manniboh@gmail.com', 'ADMIN', 'Password123'),
+    ('patient@demo.com', 'PATIENT', 'DemoPass123'),
+    ('staff@demo.com', 'STAFF', 'DemoPass123'),
   ];
 }
 
@@ -318,8 +289,7 @@ class _StatCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: color.withAlpha(12),
           borderRadius: BorderRadius.circular(14),
-          border:
-              Border.all(color: color.withAlpha(40)),
+          border: Border.all(color: color.withAlpha(40)),
         ),
         child: Column(
           children: [
@@ -327,12 +297,9 @@ class _StatCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(value,
                 style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    color: color)),
+                    fontSize: 28, fontWeight: FontWeight.w900, color: color)),
             Text(label,
-                style: context.text.labelSmall,
-                textAlign: TextAlign.center),
+                style: context.text.labelSmall, textAlign: TextAlign.center),
           ],
         ),
       )
@@ -386,9 +353,8 @@ class _ActionTile extends StatelessWidget {
                           ?.copyWith(fontWeight: FontWeight.w700)),
                   Text(subtitle,
                       style: context.text.labelSmall?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurfaceVariant)),
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant)),
                 ],
               ),
             ],
@@ -429,8 +395,7 @@ class _AccountRow extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
               color: roleColor.withAlpha(20),
               borderRadius: BorderRadius.circular(8),
@@ -462,53 +427,5 @@ class _AccountRow extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class _StatusRow extends StatelessWidget {
-  const _StatusRow(
-      {required this.label,
-      required this.status,
-      required this.ok,
-      required this.index});
-  final String label;
-  final String status;
-  final bool ok;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            ok ? Icons.check_circle_rounded : Icons.warning_amber_rounded,
-            size: 16,
-            color: ok ? AppColors.nairaGreen : AppColors.waitAmber,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(label,
-                style: const TextStyle(
-                    fontSize: 13, fontWeight: FontWeight.w600)),
-          ),
-          Text(status,
-              style: TextStyle(
-                  fontSize: 11,
-                  color: ok ? AppColors.nairaGreen : AppColors.waitAmber,
-                  fontWeight: FontWeight.w600)),
-        ],
-      ),
-    )
-        .animate(
-            delay: Duration(
-                milliseconds: 520 + index * 60))
-        .fadeIn(duration: 350.ms);
   }
 }

@@ -33,5 +33,6 @@
     }
   },
   "terminal.integrated.defaultProfile.windows": "ClinicNow PowerShell",
-  "gitdoc.enabled": true
+  "gitdoc.enabled": true,
+  "java.compile.nullAnalysis.mode": "automatic"
 }

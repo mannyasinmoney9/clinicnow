@@ -3,12 +3,13 @@
 Critical context for Kilo agents working on ClinicNow repo:
 
 ## 🚨 Critical Setup (Easy to Miss)
-- **Backend doesn't exist yet** - Must be created per CLAUDE.md Phase 0 using start.spring.io
-- **Java 21 required** - Not just any Java version; specifically 21 LTS (Adoptium/Eclipse Temurin)
+- **Backend exists** at `backend/` (Spring Boot 3.2 + Maven + Java 21)
+- **Java 21 required** - Adoptium/Eclipse Temurin at `C:\Program Files\Eclipse Adoptium\jdk-21.0.11.10-hotspot`
 - **Flutter SDK path hardcoded** in run_dev.ps1: `C:\Users\DELL GAMING\Documents\flutter_windows_3.41.5-stable\flutter`
 - **Device ID hardcoded** in run_dev.ps1: Samsung device `R58R41QZAYL` (change for your device)
-- **Maven path hardcoded** in run_dev.ps1: Points to specific IntelliJ installation
+- **Maven wrapper** (`mvnw.cmd`) used directly instead of system Maven
 - **Junction/Symlinks required**: run_dev.ps1 creates `F:` drive mapping and `C:\pc` junction for Pub cache
+- **run_dev.ps1** uses Maven (`$MVN`) but actual build uses Gradle-generated wrapper → update to use `$JAVA_HOME` + mvnw directly
 
 ## 🔑 Secrets & Configuration (Never Commit)
 - **Backend secrets**: Go in `backend/src/main/resources/application.yml` (create from example)
@@ -16,6 +17,15 @@ Critical context for Kilo agents working on ClinicNow repo:
 - **Flutter secrets**: Via `--dart-define` or `.env` (never committed)
   - Required: `API_BASE_URL`, `AGORA_APP_ID`, EmailJS keys (if using)
 - **Provided files**: `.env.example`, `backend/application.yml.example` - copy and fill
+### Demo Accounts (seeded on startup with H2 file DB)
+| Role | Email | Password |
+|------|-------|----------|
+| ADMIN | manniboh@gmail.com | Password123 |
+| PATIENT | patient@demo.com | DemoPass123 |
+| STAFF | staff@demo.com | DemoPass123 |
+- Patient & staff share same password for demo convenience
+- Admin uses separate password (matches original request)
+- Other emails can register new accounts via `/api/auth/register`
 
 ## ⚙️ Development Commands (Non-Obvious)
 - **Backend only**: `.\run_dev.ps1 backend`
@@ -26,6 +36,13 @@ Critical context for Kilo agents working on ClinicNow repo:
 
 ## 🏗️ Architecture (Not Obvious from Structure)
 - **Monorepo**: Flutter app at root, Spring Boot backend in `backend/` (create per instructions)
+- **Communication**: 
+  - REST + JWT: `dio` interceptor automatically attaches token
+  - Realtime: `stomp_dart_client` over WebSocket/STOMP (`/ws` endpoint)
+  - Fallback: REST polling every 3s if WebSocket fails
+- **State Management**: Riverpod 3.x (`flutter_riverpod` + `riverpod_annotation`)
+- **Routing**: go_router with role-based redirects (PATIENT/STAFF/ADMIN)
+- **DI**: Constructor injection only (no service locator)
 - **Communication**: 
   - REST + JWT: `dio` interceptor automatically attaches token
   - Realtime: `stomp_dart_client` over WebSocket/STOMP (`/ws` endpoint)

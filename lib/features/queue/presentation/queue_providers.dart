@@ -146,11 +146,19 @@ final queueSnapshotProvider =
     userId: userId,
     onConnected: () {
       stopPolling();
-      ref.read(stompConnectedProvider.notifier).state = true;
+      Future.microtask(() {
+        if (!controller.isClosed) {
+          ref.read(stompConnectedProvider.notifier).state = true;
+        }
+      });
     },
     onDisconnected: () {
-      startPolling(); // WebSocket dropped — fall back to REST
-      ref.read(stompConnectedProvider.notifier).state = false;
+      startPolling();
+      Future.microtask(() {
+        if (!controller.isClosed) {
+          ref.read(stompConnectedProvider.notifier).state = false;
+        }
+      });
     },
   );
 

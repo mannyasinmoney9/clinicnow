@@ -203,33 +203,58 @@ class ThemeToggle extends StatelessWidget {
       onTap: () => onChanged(!isDark),
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: AppDurations.base,
-        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOutCubic,
         width: 56,
         height: 30,
         padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
           color: isDark ? cs.surfaceContainerHighest : cs.surfaceContainer,
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: cs.outlineVariant),
+          border: Border.all(
+            color: isDark ? cs.primary.withAlpha(80) : cs.outlineVariant,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: (isDark ? cs.primary : cs.shadow).withAlpha(isDark ? 40 : 20),
+              blurRadius: isDark ? 8 : 4,
+              spreadRadius: isDark ? 1 : 0,
+            ),
+          ],
         ),
         child: AnimatedAlign(
-          duration: 350.ms,
-          curve: Curves.easeOutBack,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOutCubic,
           alignment: isDark ? Alignment.centerRight : Alignment.centerLeft,
           child: Container(
             width: 24,
             height: 24,
             decoration: BoxDecoration(
-              gradient: context.appColors.brandGradient,
+              gradient: isDark
+                  ? const LinearGradient(
+                      colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                  : context.appColors.brandGradient,
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: (isDark ? const Color(0xFF6366F1) : context.colors.primary)
+                      .withAlpha(60),
+                  blurRadius: 6,
+                  spreadRadius: 1,
+                ),
+              ],
             ),
             child: AnimatedSwitcher(
-              duration: AppDurations.fast,
-              transitionBuilder: (child, anim) =>
-                  RotationTransition(turns: anim, child: FadeTransition(opacity: anim, child: child)),
+              duration: const Duration(milliseconds: 350),
+              transitionBuilder: (child, anim) => ScaleTransition(
+                scale: anim,
+                child: FadeTransition(opacity: anim, child: child),
+              ),
               child: Icon(
-                isDark ? Icons.dark_mode : Icons.light_mode,
+                isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
                 key: ValueKey(isDark),
                 size: 14,
                 color: Colors.white,

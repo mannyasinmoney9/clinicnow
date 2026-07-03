@@ -19,6 +19,7 @@ import '../features/queue/presentation/patient_queue_page.dart';
 import '../features/queue/presentation/staff_board_page.dart';
 import '../features/splash/splash_page.dart';
 import '../features/triage/presentation/triage_page.dart';
+import '../features/home/system_status_page.dart';
 
 // ---------------------------------------------------------------------------
 // Auth-aware notifier
@@ -81,6 +82,10 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: notifier,
     redirect: notifier.redirect,
     routes: [
+      GoRoute(
+        path: '/',
+        redirect: (_, _) => '/splash',
+      ),
       GoRoute(
         path: '/splash',
         builder: (_, _) => const SplashPage(),
@@ -171,6 +176,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/profile',
         builder: (_, _) => const ProfilePage(),
+      ),
+      GoRoute(
+        path: '/system-status',
+        builder: (_, _) => const SystemStatusPage(),
       ),
       GoRoute(
         path: '/payment',

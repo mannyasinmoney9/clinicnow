@@ -12,6 +12,7 @@ import '../../shared/providers/theme_provider.dart';
 import '../../shared/widgets/connection_banner.dart';
 import '../../shared/widgets/notification_bell.dart';
 import '../auth/presentation/auth_providers.dart';
+import 'animated_menu_button.dart';
 
 class PatientHomePage extends ConsumerStatefulWidget {
   const PatientHomePage({super.key});
@@ -278,27 +279,17 @@ class _HomeAppBar extends ConsumerWidget {
           ),
           const SizedBox(width: 4),
           const NotificationBell(),
-          PopupMenuButton<String>(
-            onSelected: (v) {
-              if (v == 'logout') onLogout();
-              if (v == 'profile') onProfile();
+          AnimatedMenuButton(
+            onSelected: (v) async {
+              if (v == 'profile') context.go('/profile');
+              if (v == 'system-status') context.go('/system-status');
+              if (v == 'settings') context.go('/profile');
+              if (v == 'logout') {
+                await ref.read(authProvider.notifier).logout();
+                if (!context.mounted) return;
+                context.go('/login');
+              }
             },
-            itemBuilder: (_) => const [
-              PopupMenuItem(
-                  value: 'profile',
-                  child: Row(children: [
-                    Icon(Icons.person_outline_rounded, size: 18),
-                    SizedBox(width: 8),
-                    Text('Profile'),
-                  ])),
-              PopupMenuItem(
-                  value: 'logout',
-                  child: Row(children: [
-                    Icon(Icons.logout_rounded, size: 18),
-                    SizedBox(width: 8),
-                    Text('Logout'),
-                  ])),
-            ],
           ),
         ],
       ),
