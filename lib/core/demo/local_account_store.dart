@@ -139,6 +139,14 @@ class LocalAccountStore {
     return account;
   }
 
+  Future<void> delete(String email) async {
+    final prefs = await SharedPreferences.getInstance();
+    final all = await _loadAll(prefs);
+    final needle = email.trim().toLowerCase();
+    all.removeWhere((a) => a.email.trim().toLowerCase() == needle);
+    await _saveAll(prefs, all);
+  }
+
   Future<LocalAccount?> verify(String email, String password) async {
     final account = await findByEmail(email);
     if (account == null) return null;
