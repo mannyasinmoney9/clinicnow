@@ -142,11 +142,13 @@ class _OtpPageState extends ConsumerState<OtpPage>
       body: Stack(
         children: [
           // Animated background
-          AnimatedBuilder(
-            animation: _bgCtrl,
-            builder: (_, _) => CustomPaint(
-              painter: _OtpBgPainter(_bgCtrl.value),
-              child: const SizedBox.expand(),
+          RepaintBoundary(
+            child: AnimatedBuilder(
+              animation: _bgCtrl,
+              builder: (_, _) => CustomPaint(
+                painter: _OtpBgPainter(_bgCtrl.value),
+                child: const SizedBox.expand(),
+              ),
             ),
           ),
 

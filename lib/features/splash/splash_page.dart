@@ -382,9 +382,7 @@ class _SplashPainter extends CustomPainter {
     canvas.drawCircle(
       center,
       14,
-      Paint()
-        ..color = AppColors.nairaGreen.withAlpha(80)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
+      Paint()..color = AppColors.nairaGreen.withAlpha(80),
     );
     canvas.drawCircle(center, 10, Paint()..color = const Color(0xFF1A3A38));
     canvas.drawCircle(center, 6, Paint()..color = AppColors.nairaGreen);
