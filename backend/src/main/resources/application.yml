@@ -22,14 +22,9 @@ spring:
   sql:
     init:
       mode: never
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
 
 server:
   port: 8080
-  servlet:
-    context-path: /api
 
 springdoc:
   api-docs:
@@ -39,10 +34,9 @@ springdoc:
     operations-sorter: method
 
 jwt:
-  secret: ${JWT_SECRET:clinicnow-secret-key-change-in-production}
-  expiration: 86400000 # 24 hours in milliseconds
+  secret: ${JWT_SECRET:Y2xpbmljbm93LXNlY3JldC1rZXktZm9yLWp3dC10b2tlbi1nZW5lcmF0aW9u}
+  expiration: 86400000
 
-# Optional PostgreSQL profile for production
 ---
 spring:
   config:
