@@ -473,8 +473,7 @@ class _OtpBgPainter extends CustomPainter {
       final phase = (t + i * 0.33) % 1.0;
       final glow = Paint()
         ..color = AppColors.trustTeal
-            .withAlpha((10 + 8 * math.sin(phase * 2 * math.pi)).toInt())
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 60);
+            .withAlpha((10 + 8 * math.sin(phase * 2 * math.pi)).toInt());
       canvas.drawCircle(
         Offset(size.width * [0.2, 0.8, 0.5][i],
             size.height * [0.3, 0.6, 0.15][i]),

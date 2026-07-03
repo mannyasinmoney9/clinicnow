@@ -710,9 +710,7 @@ class _HomeBgPainter extends CustomPainter {
             AppColors.waitAmber,
             AppColors.trustTeal,
           ][i]
-              .withAlpha(7)
-          ..maskFilter =
-              const MaskFilter.blur(BlurStyle.normal, 40),
+              .withAlpha(7),
       );
     }
   }

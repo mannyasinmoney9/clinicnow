@@ -776,8 +776,7 @@ class _AuthHeaderPainter extends CustomPainter {
       final x = i == 0 ? cx * 0.6 : cx * 1.4;
       final glow = Paint()
         ..color = (i == 0 ? AppColors.trustTeal : AppColors.nairaGreen)
-            .withAlpha((20 + 15 * glowIntensity).toInt())
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 40);
+            .withAlpha((20 + 15 * glowIntensity).toInt());
       canvas.drawCircle(Offset(x, cy), size.width * 0.3, glow);
     }
 
