@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../config/app_config.dart';
 import 'api_client.dart';
 
 enum BackendStatus { checking, ok, unreachable }
@@ -12,6 +13,11 @@ class HealthNotifier extends StateNotifier<BackendStatus> {
   final Dio _dio;
 
   Future<void> check() async {
+    if (AppConfig.demoMode) {
+      // Demo mode never calls a backend — there's nothing to be unreachable.
+      state = BackendStatus.ok;
+      return;
+    }
     state = BackendStatus.checking;
     try {
       final resp = await _dio.get<dynamic>(

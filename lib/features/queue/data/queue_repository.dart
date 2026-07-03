@@ -4,33 +4,56 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
 
+import '../../../core/config/app_config.dart';
+import '../../../core/demo/demo_queue_engine.dart';
 import '../../../core/env.dart';
 import '../domain/queue_entry.dart';
 import '../domain/queue_snapshot.dart';
 
 class QueueRepository {
-  QueueRepository({required Dio dio}) : _dio = dio;
+  QueueRepository({required Dio dio}) : _dio = dio {
+    if (AppConfig.demoMode) _demo.start();
+  }
 
   final Dio _dio;
+  final DemoQueueEngine _demo = DemoQueueEngine();
+  int? _myEntryId;
 
   // -------------------------------------------------------------------------
   // REST
   // -------------------------------------------------------------------------
 
-  Future<QueueEntry> joinQueue(int clinicId) async {
+  Future<QueueEntry> joinQueue(int clinicId, {int? userId, String? patientName}) async {
+    if (AppConfig.demoMode) {
+      final entry = _demo.join(
+        userId: userId ?? 0,
+        patientName: (patientName == null || patientName.isEmpty) ? 'You' : patientName,
+      );
+      _myEntryId = entry.id;
+      return entry;
+    }
     final resp = await _dio.post<Map<String, dynamic>>(
       '/api/queue/join',
       data: {'clinicId': clinicId},
     );
-    return QueueEntry.fromJson(resp.data!);
+    final entry = QueueEntry.fromJson(resp.data!);
+    _myEntryId = entry.id;
+    return entry;
   }
 
   Future<QueueEntry> myCurrentEntry() async {
+    if (AppConfig.demoMode) {
+      final id = _myEntryId;
+      final entry = id == null ? null : _demo.clinicQueue().where((e) => e.id == id).firstOrNull;
+      if (entry == null) throw StateError('No active queue entry');
+      return entry;
+    }
     final resp = await _dio.get<Map<String, dynamic>>('/api/queue/me');
     return QueueEntry.fromJson(resp.data!);
   }
 
   Future<int> aheadCount(int entryId) async {
+    if (AppConfig.demoMode) return _demo.aheadCount(entryId);
     final resp = await _dio.get<Map<String, dynamic>>(
       '/api/queue/ahead',
       queryParameters: {'entryId': entryId},
@@ -39,6 +62,7 @@ class QueueRepository {
   }
 
   Future<List<QueueEntry>> clinicQueue(int clinicId) async {
+    if (AppConfig.demoMode) return _demo.clinicQueue();
     final resp = await _dio.get<List<dynamic>>('/api/queue/clinic/$clinicId');
     return (resp.data ?? [])
         .map((e) => QueueEntry.fromJson(e as Map<String, dynamic>))
@@ -46,16 +70,19 @@ class QueueRepository {
   }
 
   Future<QueueEntry> callNext(int entryId) async {
+    if (AppConfig.demoMode) return _demo.callNext(entryId);
     final resp = await _dio.post<Map<String, dynamic>>('/api/queue/$entryId/call');
     return QueueEntry.fromJson(resp.data!);
   }
 
   Future<QueueEntry> markDone(int entryId) async {
+    if (AppConfig.demoMode) return _demo.markDone(entryId);
     final resp = await _dio.post<Map<String, dynamic>>('/api/queue/$entryId/done');
     return QueueEntry.fromJson(resp.data!);
   }
 
   Future<QueueEntry> markNoShow(int entryId) async {
+    if (AppConfig.demoMode) return _demo.markNoShow(entryId);
     final resp = await _dio.post<Map<String, dynamic>>('/api/queue/$entryId/noshow');
     return QueueEntry.fromJson(resp.data!);
   }
@@ -69,9 +96,11 @@ class QueueRepository {
   final _userEventController = StreamController<Map<String, dynamic>>.broadcast();
   bool _connected = false;
 
-  Stream<QueueSnapshot> get queueSnapshots => _snapshotController.stream;
-  Stream<Map<String, dynamic>> get userEvents => _userEventController.stream;
-  bool get isConnected => _connected;
+  Stream<QueueSnapshot> get queueSnapshots =>
+      AppConfig.demoMode ? _demo.snapshots : _snapshotController.stream;
+  Stream<Map<String, dynamic>> get userEvents =>
+      AppConfig.demoMode ? _demo.userEvents : _userEventController.stream;
+  bool get isConnected => AppConfig.demoMode ? true : _connected;
 
   void connectStomp({
     required int clinicId,
@@ -79,6 +108,12 @@ class QueueRepository {
     void Function()? onConnected,
     void Function()? onDisconnected,
   }) {
+    if (AppConfig.demoMode) {
+      // No real socket — the local ticking engine is always "live".
+      _connected = true;
+      onConnected?.call();
+      return;
+    }
     _stomp?.deactivate();
     final wsUrl =
         '${apiBaseUrl.replaceFirst('https://', 'wss://').replaceFirst('http://', 'ws://')}/ws';
@@ -143,5 +178,8 @@ class QueueRepository {
     disconnectStomp();
     _snapshotController.close();
     _userEventController.close();
+    // Note: the demo engine is intentionally NOT disposed here — it must
+    // outlive individual screens so the queue keeps ticking across
+    // navigation. It's a process-lifetime singleton (see queueRepositoryProvider).
   }
 }

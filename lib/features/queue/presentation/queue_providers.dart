@@ -45,14 +45,20 @@ final class MyEntryError extends MyEntryState {
 }
 
 class MyEntryNotifier extends StateNotifier<MyEntryState> {
-  MyEntryNotifier(this._repo) : super(const MyEntryNone());
+  MyEntryNotifier(this._repo, this._ref) : super(const MyEntryNone());
 
   final QueueRepository _repo;
+  final Ref _ref;
 
   Future<void> join(int clinicId) async {
     state = const MyEntryLoading();
     try {
-      final entry = await _repo.joinQueue(clinicId);
+      final auth = _ref.read(authProvider);
+      final entry = await _repo.joinQueue(
+        clinicId,
+        userId: auth is AuthAuthenticated ? auth.user.userId : null,
+        patientName: auth is AuthAuthenticated ? auth.user.fullName : null,
+      );
       state = MyEntryData(entry);
     } on Exception catch (e) {
       state = MyEntryError(e.toString());
@@ -83,7 +89,7 @@ class MyEntryNotifier extends StateNotifier<MyEntryState> {
 }
 
 final myEntryProvider = StateNotifierProvider<MyEntryNotifier, MyEntryState>((ref) {
-  return MyEntryNotifier(ref.watch(queueRepositoryProvider));
+  return MyEntryNotifier(ref.watch(queueRepositoryProvider), ref);
 });
 
 // ---------------------------------------------------------------------------
