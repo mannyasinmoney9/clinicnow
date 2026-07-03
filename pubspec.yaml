@@ -58,6 +58,7 @@ dependencies:
   paystack_for_flutter: ^1.0.4
   # agora_rtc_engine removed — NDK linker incompatible; fallback demo UI used
   riverpod_annotation: ^2.6.1
+  crypto: ^3.0.6
 
 dev_dependencies:
   flutter_test:
