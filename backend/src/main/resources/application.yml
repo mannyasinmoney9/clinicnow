@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: clinichnow
+  datasource:
+    url: jdbc:h2:file:./data/clinicnow
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      mode: never
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+
+jwt:
+  secret: ${JWT_SECRET:clinicnow-secret-key-change-in-production}
+  expiration: 86400000 # 24 hours in milliseconds
+
+# Optional PostgreSQL profile for production
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/clinicnow}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
