@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_back_button.dart';
@@ -157,7 +158,7 @@ class _MessageBubble extends StatelessWidget {
 
     final bubbleColor = isUser
         ? AppColors.trustTeal
-        : _triageColor(message.triageLevel, cs);
+        : _triageColor(message.triageLevel, cs, context);
     final textColor = isUser ? Colors.white : cs.onSurface;
     final radius = BorderRadius.only(
       topLeft: const Radius.circular(18),
@@ -201,14 +202,15 @@ class _MessageBubble extends StatelessWidget {
         );
   }
 
-  Color _triageColor(TriageLevel level, ColorScheme cs) {
+  Color _triageColor(TriageLevel level, ColorScheme cs, BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     switch (level) {
       case TriageLevel.red:
-        return const Color(0xFFFFEBEE);
+        return isDark ? const Color(0xFF3E1A1A) : const Color(0xFFFFEBEE);
       case TriageLevel.yellow:
-        return const Color(0xFFFFF8E1);
+        return isDark ? const Color(0xFF3E3210) : const Color(0xFFFFF8E1);
       case TriageLevel.green:
-        return const Color(0xFFE8F5E9);
+        return isDark ? const Color(0xFF1A3E1E) : const Color(0xFFE8F5E9);
       case TriageLevel.none:
         return cs.surface;
     }
@@ -293,24 +295,32 @@ class _TypingBubbleState extends State<_TypingBubble>
 class _EmergencyButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-      decoration: BoxDecoration(
-        color: AppColors.emergencyRed,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          Icon(Icons.emergency_rounded, color: Colors.white, size: 16),
-          SizedBox(width: 6),
-          Text('🚑  Call 112 (Emergency)',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13)),
-        ],
+    return GestureDetector(
+      onTap: () async {
+        final uri = Uri.parse('tel:112');
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri);
+        }
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        decoration: BoxDecoration(
+          color: AppColors.emergencyRed,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.emergency_rounded, color: Colors.white, size: 16),
+            SizedBox(width: 6),
+            Text('🚑  Call 112 (Emergency)',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13)),
+          ],
+        ),
       ),
     )
         .animate(onPlay: (c) => c.repeat())

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/demo/offline_ada_engine.dart';
 import '../../../core/theme/app_theme.dart';
@@ -242,24 +243,33 @@ class _TriagePageState extends State<TriagePage> {
 class _EmergencyBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.emergencyRed,
-        borderRadius: AppRadii.rMd,
-      ),
-      child: const Row(
-        children: [
-          Icon(Icons.emergency_rounded, color: Colors.white, size: 18),
-          SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'Emergency? Call 112 or Lagos 767',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+    return GestureDetector(
+      onTap: () async {
+        final uri = Uri.parse('tel:112');
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri);
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppColors.emergencyRed,
+          borderRadius: AppRadii.rMd,
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.emergency_rounded, color: Colors.white, size: 18),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Tap to call 112 (Emergency)',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+              ),
             ),
-          ),
-        ],
+            Icon(Icons.phone_rounded, color: Colors.white, size: 18),
+          ],
+        ),
       ),
     )
         .animate(onPlay: (c) => c.repeat(reverse: true))

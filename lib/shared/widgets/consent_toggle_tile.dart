@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 
-/// NDPA-compliant consent toggle. Required toggles cannot be switched off.
-/// Never pre-check any toggle — NDPA GAID Article 19.
+/// NDPA-compliant consent checkbox. Required checkboxes cannot be unchecked.
+/// Never pre-check any checkbox — NDPA GAID Article 19.
 class ConsentToggleTile extends StatelessWidget {
   const ConsentToggleTile({
     super.key,
@@ -21,7 +21,6 @@ class ConsentToggleTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Required toggles can be turned ON freely but cannot be turned OFF once accepted.
     final canToggle = !(isRequired && value);
     return InkWell(
       onTap: canToggle ? () => onChanged(!value) : null,
@@ -34,16 +33,22 @@ class ConsentToggleTile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Switch(
+            Checkbox(
               value: value,
-              onChanged: canToggle ? onChanged : null,
+              onChanged: canToggle
+                  ? (v) => onChanged(v ?? false)
+                  : null,
+              activeColor: AppColors.trustTeal,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
             ),
-            const SizedBox(width: AppSpacing.sm),
+            const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: AppSpacing.sm),
+                  const SizedBox(height: 2),
                   Row(
                     children: [
                       Expanded(
