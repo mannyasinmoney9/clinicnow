@@ -2,18 +2,18 @@ package com.clinicnow.clinicnow.user;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Collections;
 
 @Entity
-@Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
+@Table(name = "users")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User implements UserDetails {
@@ -22,34 +22,33 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    passwordHash;
-
-    @Column(nullable = false)
+    @Column(name = "full_name", nullable = false)
     private String fullName;
 
     private String phone;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Role role;
-
-    private String photoUrl;
-    private String hmoName;
-    private String hmoEnrolleeId;
 
     public enum Role {
         PATIENT, STAFF, ADMIN
     }
 
+    // UserDetails implementation
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
+        return java.util.List.of(() -> "ROLE_" + name());
+    }
+
+    @Override
+    public String getPassword() {
+        return passwordHash;
     }
 
     @Override
@@ -75,10 +74,5 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    // Helper method to set password (will be encoded by service)
-    public void setPassword(String password) {
-        this.passwordHash = password; // To be encoded by service
     }
 }
