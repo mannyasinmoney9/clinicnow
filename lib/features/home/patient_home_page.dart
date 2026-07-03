@@ -78,6 +78,7 @@ class _PatientHomePageState extends ConsumerState<PatientHomePage>
                     if (!context.mounted) return;
                     context.go('/login');
                   },
+                  onProfile: () => context.go('/profile'),
                 ),
 
                 // Scrollable body
@@ -149,7 +150,7 @@ class _PatientHomePageState extends ConsumerState<PatientHomePage>
                               label: 'Appointments',
                               subtitle: 'Book a visit',
                               color: AppColors.nairaGreen,
-                              onTap: () {},
+                              onTap: () => context.go('/appointments'),
                               index: 1,
                             ),
                             _ActionCard(
@@ -167,6 +168,22 @@ class _PatientHomePageState extends ConsumerState<PatientHomePage>
                               color: AppColors.waitAmber,
                               onTap: () => context.go('/assistant'),
                               index: 3,
+                            ),
+                            _ActionCard(
+                              icon: Icons.health_and_safety_rounded,
+                              label: 'Symptom Check',
+                              subtitle: '7-question triage',
+                              color: AppColors.emergencyRed,
+                              onTap: () => context.go('/triage'),
+                              index: 4,
+                            ),
+                            _ActionCard(
+                              icon: Icons.person_outline_rounded,
+                              label: 'Profile',
+                              subtitle: 'Settings & theme',
+                              color: AppColors.trustTeal,
+                              onTap: () => context.go('/profile'),
+                              index: 5,
                             ),
                           ],
                         ),
@@ -217,13 +234,15 @@ class _PatientHomePageState extends ConsumerState<PatientHomePage>
 // App bar
 // ---------------------------------------------------------------------------
 
-class _HomeAppBar extends StatelessWidget {
-  const _HomeAppBar({required this.name, required this.onLogout});
+class _HomeAppBar extends ConsumerWidget {
+  const _HomeAppBar({required this.name, required this.onLogout, required this.onProfile});
   final String name;
   final VoidCallback onLogout;
+  final VoidCallback onProfile;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 8, 8),
       child: Row(
@@ -247,12 +266,27 @@ class _HomeAppBar extends StatelessWidget {
               ],
             ),
           ),
+          ThemeToggle(
+            isDark: themeMode == ThemeMode.dark,
+            onChanged: (dark) => ref
+                .read(themeModeProvider.notifier)
+                .set(dark ? ThemeMode.dark : ThemeMode.light),
+          ),
+          const SizedBox(width: 4),
           const NotificationBell(),
           PopupMenuButton<String>(
             onSelected: (v) {
               if (v == 'logout') onLogout();
+              if (v == 'profile') onProfile();
             },
             itemBuilder: (_) => const [
+              PopupMenuItem(
+                  value: 'profile',
+                  child: Row(children: [
+                    Icon(Icons.person_outline_rounded, size: 18),
+                    SizedBox(width: 8),
+                    Text('Profile'),
+                  ])),
               PopupMenuItem(
                   value: 'logout',
                   child: Row(children: [

@@ -7,6 +7,7 @@ import '../../core/network/health_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/widgets/signature_widgets.dart';
+import '../../shared/providers/theme_provider.dart';
 import '../../shared/widgets/connection_banner.dart';
 import '../../shared/widgets/notification_bell.dart';
 import '../auth/presentation/auth_providers.dart';
@@ -19,16 +20,25 @@ class StaffHomePage extends ConsumerWidget {
     final authState = ref.watch(authProvider);
     final user = authState is AuthAuthenticated ? authState.user : null;
     final s = context.strings;
+    final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Staff — ${user?.firstName ?? ''}'),
         actions: [
+          ThemeToggle(
+            isDark: themeMode == ThemeMode.dark,
+            onChanged: (dark) => ref
+                .read(themeModeProvider.notifier)
+                .set(dark ? ThemeMode.dark : ThemeMode.light),
+          ),
+          const SizedBox(width: AppSpacing.sm),
           const NotificationBell(),
           const LivePill(),
           const SizedBox(width: AppSpacing.sm),
           PopupMenuButton<String>(
             onSelected: (v) async {
+              if (v == 'profile') context.go('/profile');
               if (v == 'logout') {
                 await ref.read(authProvider.notifier).logout();
                 if (!context.mounted) return;
@@ -36,6 +46,7 @@ class StaffHomePage extends ConsumerWidget {
               }
             },
             itemBuilder: (_) => [
+              const PopupMenuItem(value: 'profile', child: Text('Profile')),
               PopupMenuItem(value: 'logout', child: Text(s.logout)),
             ],
           ),

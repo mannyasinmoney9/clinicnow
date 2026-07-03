@@ -3,10 +3,14 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/network/api_client.dart';
+import '../../core/config/app_config.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/signature_widgets.dart';
+import '../../shared/providers/theme_provider.dart';
+import '../../shared/widgets/coming_soon_sheet.dart';
 import '../../shared/widgets/notification_bell.dart';
 import '../auth/presentation/auth_providers.dart';
+import '../queue/presentation/queue_providers.dart';
 
 class AdminHomePage extends ConsumerStatefulWidget {
   const AdminHomePage({super.key});
@@ -28,15 +32,12 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
 
   Future<void> _loadStats() async {
     try {
-      final dio = ref.read(dioProvider);
-      final resp = await dio.get<List<dynamic>>('/api/queue/clinic/1');
-      final list = resp.data ?? [];
+      final repo = ref.read(queueRepositoryProvider);
+      final list = await repo.clinicQueue(1);
       if (!mounted) return;
       setState(() {
-        _waitingCount =
-            list.where((e) => (e as Map)['status'] == 'WAITING').length;
-        _seenToday =
-            list.where((e) => (e as Map)['status'] == 'SEEN').length;
+        _waitingCount = list.where((e) => e.isWaiting).length;
+        _seenToday = list.where((e) => e.status == 'SEEN').length;
         _loaded = true;
       });
     } catch (_) {
@@ -49,6 +50,7 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
     final authState = ref.watch(authProvider);
     final user =
         authState is AuthAuthenticated ? authState.user : null;
+    final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -91,9 +93,17 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
               ],
             ),
           ),
+          ThemeToggle(
+            isDark: themeMode == ThemeMode.dark,
+            onChanged: (dark) => ref
+                .read(themeModeProvider.notifier)
+                .set(dark ? ThemeMode.dark : ThemeMode.light),
+          ),
+          const SizedBox(width: 4),
           const NotificationBell(),
           PopupMenuButton<String>(
             onSelected: (v) async {
+              if (v == 'profile') context.go('/profile');
               if (v == 'logout') {
                 await ref.read(authProvider.notifier).logout();
                 if (!context.mounted) return;
@@ -101,6 +111,7 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
               }
             },
             itemBuilder: (_) => const [
+              PopupMenuItem(value: 'profile', child: Text('Profile')),
               PopupMenuItem(value: 'logout', child: Text('Logout')),
             ],
           ),
@@ -179,7 +190,12 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
                     label: 'Staff',
                     subtitle: 'Manage team',
                     color: AppColors.nairaGreen,
-                    onTap: () {},
+                    onTap: () => ComingSoonSheet.show(
+                      context,
+                      title: 'Staff management',
+                      subtitle: 'Add, assign, and manage staff accounts from here once the backend is connected.',
+                      icon: Icons.people_rounded,
+                    ),
                     index: 1,
                   ),
                   _ActionTile(
@@ -187,7 +203,12 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
                     label: 'Reports',
                     subtitle: 'Patient analytics',
                     color: const Color(0xFF7C3AED),
-                    onTap: () {},
+                    onTap: () => ComingSoonSheet.show(
+                      context,
+                      title: 'Reports & analytics',
+                      subtitle: 'Hourly throughput, symptom mix, and trend charts are on the roadmap.',
+                      icon: Icons.bar_chart_rounded,
+                    ),
                     index: 2,
                   ),
                   _ActionTile(
@@ -195,7 +216,12 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
                     label: 'Clinics',
                     subtitle: 'Manage locations',
                     color: AppColors.waitAmber,
-                    onTap: () {},
+                    onTap: () => ComingSoonSheet.show(
+                      context,
+                      title: 'Clinic locations',
+                      subtitle: 'Add and manage clinic branches once the backend is connected.',
+                      icon: Icons.local_hospital_outlined,
+                    ),
                     index: 3,
                   ),
                 ],
