@@ -124,6 +124,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = const AuthUnauthenticated();
   }
 
+  Future<void> deleteAccount() async {
+    final current = state;
+    if (current is AuthAuthenticated) {
+      await _repo.deleteAccount(current.user.email);
+    }
+    state = const AuthUnauthenticated();
+  }
+
   String _dioMsg(DioException e) {
     final data = e.response?.data;
     if (data is Map<String, dynamic>) {

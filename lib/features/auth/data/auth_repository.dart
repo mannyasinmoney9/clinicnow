@@ -196,6 +196,20 @@ class AuthRepository {
     ]);
   }
 
+  /// Permanently removes the current account (demo mode: local device only)
+  /// and clears the session.
+  Future<void> deleteAccount(String email) async {
+    if (AppConfig.demoMode) {
+      await _accountStore.delete(email);
+    }
+    await Future.wait([
+      _storage.delete(key: _tokenKey),
+      _storage.delete(key: _userKey),
+      _storage.delete(key: _savedEmailKey),
+      _storage.delete(key: _savedPassKey),
+    ]);
+  }
+
   Future<void> _persist(UserModel user) async {
     await Future.wait([
       _storage.write(key: _tokenKey, value: user.token),
