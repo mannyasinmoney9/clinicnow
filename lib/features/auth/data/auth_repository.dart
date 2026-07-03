@@ -1,14 +1,25 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../domain/user_model.dart';
 import '../../../core/env.dart';
+import '../../../core/config/app_config.dart';
+import '../../../core/demo/local_account_store.dart';
 
 // Simple record for register result (user + optional OTP code)
 final class RegisterResult {
   const RegisterResult(this.user, this.otpCode);
   final UserModel user;
   final String? otpCode;
+}
+
+/// Clean, user-facing auth failure (no "Exception: " prefix leaking into UI).
+class AuthFailure implements Exception {
+  AuthFailure(this.message);
+  final String message;
+  @override
+  String toString() => message;
 }
 
 class AuthRepository {
@@ -23,6 +34,10 @@ class AuthRepository {
 
   final Dio _dio;
   final FlutterSecureStorage _storage;
+  final LocalAccountStore _accountStore = LocalAccountStore();
+
+  // email(lowercase) -> pending OTP code, demo mode only (in-memory).
+  final Map<String, String> _pendingOtps = {};
 
   static const _tokenKey = 'jwt_token';
   static const _userKey = 'user_json';
@@ -32,6 +47,16 @@ class AuthRepository {
   // ---- Auth ----------------------------------------------------------------
 
   Future<UserModel> login(String email, String password) async {
+    if (AppConfig.demoMode) {
+      await _accountStore.ensureSeeded();
+      final account = await _accountStore.verify(email, password);
+      if (account == null) {
+        throw AuthFailure('Incorrect email or password.');
+      }
+      final user = _userFromAccount(account);
+      await _persist(user);
+      return user;
+    }
     final response = await _dio.post<Map<String, dynamic>>(
       '/api/auth/login',
       data: {'email': email, 'password': password},
@@ -48,6 +73,25 @@ class AuthRepository {
     String? phone,
     String role = 'PATIENT',
   }) async {
+    if (AppConfig.demoMode) {
+      await _accountStore.ensureSeeded();
+      final LocalAccount account;
+      try {
+        account = await _accountStore.create(
+          fullName: fullName,
+          email: email,
+          password: password,
+          role: role,
+          phone: phone,
+        );
+      } on StateError catch (e) {
+        throw AuthFailure(e.message);
+      }
+      final code = _genOtp();
+      _pendingOtps[email.trim().toLowerCase()] = code;
+      // Don't persist yet — wait for OTP verification
+      return RegisterResult(_userFromAccount(account), code);
+    }
     final response = await _dio.post<Map<String, dynamic>>(
       '/api/auth/register',
       data: {
@@ -65,6 +109,19 @@ class AuthRepository {
   }
 
   Future<UserModel> verifyOtp(String email, String code) async {
+    if (AppConfig.demoMode) {
+      final key = email.trim().toLowerCase();
+      final expected = _pendingOtps[key];
+      if (expected == null || expected != code) {
+        throw AuthFailure('Incorrect code. Please try again.');
+      }
+      final account = await _accountStore.findByEmail(email);
+      if (account == null) throw AuthFailure('Account not found.');
+      _pendingOtps.remove(key);
+      final user = _userFromAccount(account);
+      await _persist(user);
+      return user;
+    }
     final response = await _dio.post<Map<String, dynamic>>(
       '/api/auth/verify-otp',
       data: {'email': email, 'code': code},
@@ -75,11 +132,29 @@ class AuthRepository {
   }
 
   Future<String?> resendOtp(String email) async {
+    if (AppConfig.demoMode) {
+      final code = _genOtp();
+      _pendingOtps[email.trim().toLowerCase()] = code;
+      return code;
+    }
     final response = await _dio.post<Map<String, dynamic>>(
       '/api/auth/resend-otp',
       data: {'email': email},
     );
     return response.data?['otpCode'] as String?;
+  }
+
+  UserModel _userFromAccount(LocalAccount a) => UserModel.fromJson({
+        'userId': a.userId,
+        'fullName': a.fullName,
+        'email': a.email,
+        'role': a.role,
+        'token': 'demo-${a.userId}-${DateTime.now().millisecondsSinceEpoch}',
+      });
+
+  String _genOtp() {
+    final rand = Random();
+    return List.generate(6, (_) => rand.nextInt(10)).join();
   }
 
   // ---- Saved credentials (auto-fill) ---------------------------------------

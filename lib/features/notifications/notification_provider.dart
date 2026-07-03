@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../auth/presentation/auth_providers.dart';
 import '../queue/presentation/queue_providers.dart';
 import 'domain/app_notification.dart';
 
@@ -19,7 +21,18 @@ class NotificationNotifier extends StateNotifier<List<AppNotification>> {
   }
 
   void _handleEvent(Map<String, dynamic> event) {
+    // Only react to events addressed to the signed-in user — the demo queue
+    // engine broadcasts every seeded patient's turn on one shared stream.
+    final auth = _ref.read(authProvider);
+    final myId = auth is AuthAuthenticated ? auth.user.userId : null;
+    final eventUserId = (event['userId'] as num?)?.toInt();
+    if (myId != null && eventUserId != null && eventUserId != myId) return;
+
     final type = (event['type'] as String? ?? '').toUpperCase();
+
+    if (type == 'YOU_ARE_NEXT' || type == 'YOURE_NEXT' || type == 'CALLED') {
+      HapticFeedback.vibrate();
+    }
 
     final notif = switch (type) {
       'YOU_ARE_NEXT' || 'YOURE_NEXT' => AppNotification(
