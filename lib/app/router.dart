@@ -160,6 +160,29 @@ final routerProvider = Provider<GoRouter>((ref) {
           return TeleconsultPage(asStaff: asStaff);
         },
       ),
+      GoRoute(
+        path: '/triage',
+        builder: (_, _) => const TriagePage(),
+      ),
+      GoRoute(
+        path: '/appointments',
+        builder: (_, _) => const AppointmentsPage(),
+      ),
+      GoRoute(
+        path: '/profile',
+        builder: (_, _) => const ProfilePage(),
+      ),
+      GoRoute(
+        path: '/payment',
+        builder: (_, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          return PaymentPage(
+            amountNaira: extra['amountNaira'] as int? ?? 2000,
+            label: extra['label'] as String? ?? 'Dr. Bello · video consult',
+            onSuccessRoute: extra['onSuccessRoute'] as String?,
+          );
+        },
+      ),
     ],
   );
 });
