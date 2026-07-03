@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/appointments/presentation/appointments_page.dart';
 import '../features/assistant/presentation/assistant_page.dart';
 import '../features/teleconsult/presentation/teleconsult_page.dart';
 import '../features/auth/presentation/auth_providers.dart';
@@ -12,9 +13,12 @@ import '../features/home/patient_home_page.dart';
 import '../features/home/staff_home_page.dart';
 import '../features/onboarding/presentation/onboarding_page.dart';
 import '../features/onboarding/presentation/thankyou_page.dart';
+import '../features/payment/presentation/payment_page.dart';
+import '../features/profile/presentation/profile_page.dart';
 import '../features/queue/presentation/patient_queue_page.dart';
 import '../features/queue/presentation/staff_board_page.dart';
 import '../features/splash/splash_page.dart';
+import '../features/triage/presentation/triage_page.dart';
 
 // ---------------------------------------------------------------------------
 // Auth-aware notifier
