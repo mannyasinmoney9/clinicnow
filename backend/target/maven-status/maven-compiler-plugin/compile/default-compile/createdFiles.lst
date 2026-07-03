@@ -1,0 +1,15 @@
+com\clinicnow\clinicnow\user\User$Role.class
+com\clinicnow\clinicnow\auth\AuthController.class
+com\clinicnow\clinicnow\config\SeedRunner.class
+com\clinicnow\clinicnow\user\User.class
+com\clinicnow\clinicnow\auth\RegisterRequest.class
+com\clinicnow\clinicnow\config\JwtAuthenticationFilter.class
+com\clinicnow\clinicnow\user\UserRepository.class
+com\clinicnow\clinicnow\config\JwtUtil.class
+com\clinicnow\clinicnow\ClinicNowApplication.class
+com\clinicnow\clinicnow\auth\AuthRequest.class
+com\clinicnow\clinicnow\config\HealthController.class
+com\clinicnow\clinicnow\config\SecurityConfig.class
+com\clinicnow\clinicnow\auth\AuthResponse.class
+com\clinicnow\clinicnow\user\UserDetailsServiceImpl.class
+com\clinicnow\clinicnow\user\User$UserBuilder.class
