@@ -158,7 +158,11 @@ class _PatientHomePageState extends ConsumerState<PatientHomePage>
                               label: 'Video Consult',
                               subtitle: 'See a doctor now',
                               color: const Color(0xFF7C3AED),
-                              onTap: () => context.go('/teleconsult'),
+                              onTap: () => context.go('/payment', extra: {
+                                'amountNaira': 2000,
+                                'label': 'Dr. Oluwaseun Adeyemi · video consult',
+                                'onSuccessRoute': '/teleconsult',
+                              }),
                               index: 2,
                             ),
                             _ActionCard(
