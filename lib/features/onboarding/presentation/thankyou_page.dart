@@ -230,8 +230,7 @@ class _CrossPainter extends CustomPainter {
 
     final glowPaint = Paint()
       ..color = AppColors.nairaGreen.withAlpha(
-          (120 + 80 * math.sin(phase * 2 * math.pi)).toInt())
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14);
+          (120 + 80 * math.sin(phase * 2 * math.pi)).toInt());
 
     final fillPaint = Paint()
       ..shader = const LinearGradient(
@@ -302,8 +301,7 @@ class _ThankYouBgPainter extends CustomPainter {
           AppColors.nairaGreen,
           AppColors.waitAmber,
         ][i]
-            .withAlpha((12 + 8 * math.sin(phase * 2 * math.pi)).toInt())
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 60);
+            .withAlpha((12 + 8 * math.sin(phase * 2 * math.pi)).toInt());
       canvas.drawCircle(Offset(x, y), r, glow);
     }
 

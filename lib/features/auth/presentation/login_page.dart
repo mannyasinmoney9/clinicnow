@@ -784,8 +784,7 @@ class _AuthHeaderPainter extends CustomPainter {
     final crossGlow = Paint()
       ..color = AppColors.nairaGreen.withAlpha(
         (30 + 20 * glowIntensity).toInt(),
-      )
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+      );
     final crossFill = Paint()..color = AppColors.nairaGreen.withAlpha(180);
     const t = 12.0;
     final crossPath = Path()

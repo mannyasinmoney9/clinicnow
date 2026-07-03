@@ -290,8 +290,7 @@ class _SplashPainter extends CustomPainter {
     final glowPaint = Paint()
       ..color = AppColors.nairaGreen.withAlpha(
         (40 + 30 * glowIntensity).toInt(),
-      )
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20);
+      );
     canvas.drawCircle(
       center,
       size.shortestSide * 0.22 * (1 + 0.03 * pulse),
@@ -333,8 +332,7 @@ class _SplashPainter extends CustomPainter {
     final glowPaint = Paint()
       ..color = AppColors.nairaGreen.withAlpha(
         (55 + 40 * glowIntensity).toInt(),
-      )
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+      );
 
     final needlePath = _buildNeedlePath(r);
     canvas.drawPath(needlePath, glowPaint);
