@@ -65,11 +65,13 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
       body: Stack(
         children: [
           // Subtle animated background
-          AnimatedBuilder(
-            animation: _bgCtrl,
-            builder: (_, _) => CustomPaint(
-              painter: _OnboardingBgPainter(_bgCtrl.value),
-              child: const SizedBox.expand(),
+          RepaintBoundary(
+            child: AnimatedBuilder(
+              animation: _bgCtrl,
+              builder: (_, _) => CustomPaint(
+                painter: _OnboardingBgPainter(_bgCtrl.value),
+                child: const SizedBox.expand(),
+              ),
             ),
           ),
           SafeArea(

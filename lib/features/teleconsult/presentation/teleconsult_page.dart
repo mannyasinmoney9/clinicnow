@@ -220,39 +220,43 @@ class _FallbackCallView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              AnimatedBuilder(
-                animation: pulseCtrl,
-                builder: (_, child) => Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    for (int i = 0; i < 3; i++)
-                      Container(
-                        width: 80 + i * 28 + pulseCtrl.value * 14,
-                        height: 80 + i * 28 + pulseCtrl.value * 14,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.trustTeal.withAlpha(
-                              (60 - i * 15 - (pulseCtrl.value * 20).toInt())
-                                  .clamp(0, 255),
+              RepaintBoundary(
+                child: AnimatedBuilder(
+                  animation: pulseCtrl,
+                  builder: (_, child) => Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      for (int i = 0; i < 3; i++)
+                        Container(
+                          width: 80 + i * 28 + pulseCtrl.value * 14,
+                          height: 80 + i * 28 + pulseCtrl.value * 14,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.trustTeal.withAlpha(
+                                (60 - i * 15 - (pulseCtrl.value * 20).toInt())
+                                    .clamp(0, 255),
+                              ),
+                              width: 1.5,
                             ),
-                            width: 1.5,
                           ),
                         ),
-                      ),
-                    child!,
-                  ],
+                      child!,
+                    ],
+                  ),
+                  child: const _DoctorAvatar(),
                 ),
-                child: const _DoctorAvatar(),
               ),
 
               const SizedBox(height: 24),
 
-              AnimatedBuilder(
-                animation: waveCtrl,
-                builder: (_, _) => CustomPaint(
-                  painter: _WaveformPainter(waveCtrl.value),
-                  size: const Size(160, 32),
+              RepaintBoundary(
+                child: AnimatedBuilder(
+                  animation: waveCtrl,
+                  builder: (_, _) => CustomPaint(
+                    painter: _WaveformPainter(waveCtrl.value),
+                    size: const Size(160, 32),
+                  ),
                 ),
               ),
 
