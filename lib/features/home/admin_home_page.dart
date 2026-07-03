@@ -257,26 +257,26 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
               const SizedBox(height: 12),
               _StatusRow(
                 label: 'Backend API',
-                status: 'Online',
+                status: AppConfig.demoMode ? 'Demo mode (local)' : 'Online',
                 ok: true,
                 index: 0,
               ),
               _StatusRow(
-                label: 'WebSocket / STOMP',
-                status: 'Connected',
+                label: 'Live queue engine',
+                status: AppConfig.demoMode ? 'Ticking locally' : 'Connected (STOMP)',
                 ok: true,
                 index: 1,
               ),
               _StatusRow(
-                label: 'H2 Database',
-                status: 'Running',
+                label: 'Accounts',
+                status: AppConfig.demoMode ? 'On-device store' : 'H2 Database',
                 ok: true,
                 index: 2,
               ),
               _StatusRow(
-                label: 'Gemini AI',
-                status: 'Check GEMINI_API_KEY',
-                ok: false,
+                label: 'Nurse Ada',
+                status: AppConfig.demoMode ? 'Offline scripted engine' : 'Check GEMINI_API_KEY',
+                ok: true,
                 index: 3,
               ),
 
@@ -290,8 +290,8 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
 
   static const _demoAccounts = [
     ('manniboh@gmail.com', 'ADMIN', 'dylan/px4tm'),
-    ('staff@demo', 'STAFF', 'Password123'),
-    ('patient@demo', 'PATIENT', 'Password123'),
+    ('staff@clinicnow.demo', 'STAFF', 'Password123'),
+    ('patient@clinicnow.demo', 'PATIENT', 'Password123'),
   ];
 }
 
