@@ -147,7 +147,7 @@ final queueSnapshotProvider =
     userId: userId,
     onConnected: () {
       stopPolling();
-      Future.microtask(() {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
         if (!controller.isClosed) {
           ref.read(stompConnectedProvider.notifier).state = true;
         }
@@ -155,7 +155,7 @@ final queueSnapshotProvider =
     },
     onDisconnected: () {
       startPolling();
-      Future.microtask(() {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
         if (!controller.isClosed) {
           ref.read(stompConnectedProvider.notifier).state = false;
         }
