@@ -47,12 +47,15 @@ class _PaymentPageState extends State<PaymentPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: context.colors.surface,
-      appBar: _stage == _PayStage.choosing
-          ? AppBar(leading: const AppBackButton(), title: const Text('Teleconsult fee'))
-          : null,
-      body: switch (_stage) {
+    return PopScope(
+      // Never let the Android back button dump the user out mid-payment.
+      canPop: _stage != _PayStage.processing,
+      child: Scaffold(
+        backgroundColor: context.colors.surface,
+        appBar: _stage == _PayStage.choosing
+            ? AppBar(leading: const AppBackButton(), title: const Text('Teleconsult fee'))
+            : null,
+        body: switch (_stage) {
         _PayStage.choosing => _ChoosingView(
             amountNaira: widget.amountNaira,
             label: widget.label,
@@ -75,7 +78,8 @@ class _PaymentPageState extends State<PaymentPage> {
               }
             },
           ),
-      },
+        },
+      ),
     );
   }
 }
