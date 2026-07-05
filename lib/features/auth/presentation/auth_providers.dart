@@ -53,9 +53,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repo;
 
   Future<void> _init() async {
-    final saved = await _repo.getSavedUser();
-    state =
-        saved != null ? AuthAuthenticated(saved) : const AuthUnauthenticated();
+    try {
+      final saved = await _repo.getSavedUser();
+      state =
+          saved != null ? AuthAuthenticated(saved) : const AuthUnauthenticated();
+    } catch (_) {
+      state = const AuthUnauthenticated();
+    }
   }
 
   Future<void> login(String email, String password) async {
@@ -120,16 +124,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> logout() async {
-    await _repo.logout();
-    state = const AuthUnauthenticated();
+    try {
+      await _repo.logout();
+    } finally {
+      state = const AuthUnauthenticated();
+    }
   }
 
   Future<void> deleteAccount() async {
     final current = state;
     if (current is AuthAuthenticated) {
-      await _repo.deleteAccount(current.user.email);
+      try {
+        await _repo.deleteAccount(current.user.email);
+      } finally {
+        state = const AuthUnauthenticated();
+      }
+    } else {
+      state = const AuthUnauthenticated();
     }
-    state = const AuthUnauthenticated();
   }
 
   String _dioMsg(DioException e) {

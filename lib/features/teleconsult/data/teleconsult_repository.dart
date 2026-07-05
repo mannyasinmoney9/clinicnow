@@ -11,14 +11,18 @@ class TeleconsultRepository {
   Future<TeleconsultSession> createSession() async {
     if (AppConfig.demoMode) return _demoSession();
     final resp = await _dio.post<Map<String, dynamic>>('/api/teleconsult');
-    return TeleconsultSession.fromJson(resp.data!);
+    final data = resp.data;
+    if (data == null) throw Exception('Empty response from server');
+    return TeleconsultSession.fromJson(data);
   }
 
   /// Staff gets the latest active session.
   Future<TeleconsultSession> latestSession() async {
     if (AppConfig.demoMode) return _demoSession();
     final resp = await _dio.get<Map<String, dynamic>>('/api/teleconsult/latest');
-    return TeleconsultSession.fromJson(resp.data!);
+    final data = resp.data;
+    if (data == null) throw Exception('Empty response from server');
+    return TeleconsultSession.fromJson(data);
   }
 
   Future<TeleconsultSession> _demoSession() async {

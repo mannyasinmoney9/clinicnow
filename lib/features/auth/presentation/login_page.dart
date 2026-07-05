@@ -74,15 +74,19 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Future<void> _loadSavedCredentials() async {
-    final repo = ref.read(authRepositoryProvider);
-    final creds = await repo.getSavedCredentials();
-    if (creds != null && mounted) {
-      setState(() {
-        _hasSavedCreds = true;
-        _savedEmail = creds.$1;
-        _loginEmailCtrl.text = creds.$1;
-        _loginPassCtrl.text = creds.$2;
-      });
+    try {
+      final repo = ref.read(authRepositoryProvider);
+      final creds = await repo.getSavedCredentials();
+      if (creds != null && mounted) {
+        setState(() {
+          _hasSavedCreds = true;
+          _savedEmail = creds.$1;
+          _loginEmailCtrl.text = creds.$1;
+          _loginPassCtrl.text = creds.$2;
+        });
+      }
+    } catch (_) {
+      // Secure storage may fail — non-critical, just skip pre-fill.
     }
   }
 

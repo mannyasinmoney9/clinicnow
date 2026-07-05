@@ -254,7 +254,13 @@ class _EntryCard extends ConsumerWidget {
                 onTap: () async {
                   try {
                     await repo.markDone(entry.id);
-                  } catch (_) {}
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to mark done: $e')),
+                      );
+                    }
+                  }
                 },
               )
             : Row(
@@ -266,7 +272,13 @@ class _EntryCard extends ConsumerWidget {
                     onTap: () async {
                       try {
                         await repo.callNext(entry.id);
-                      } catch (_) {}
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Failed to call next: $e')),
+                          );
+                        }
+                      }
                     },
                   ),
                   const SizedBox(width: 4),
@@ -276,7 +288,13 @@ class _EntryCard extends ConsumerWidget {
                     onTap: () async {
                       try {
                         await repo.markNoShow(entry.id);
-                      } catch (_) {}
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Failed to mark no-show: $e')),
+                          );
+                        }
+                      }
                     },
                   ),
                 ],

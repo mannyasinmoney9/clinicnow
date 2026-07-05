@@ -36,7 +36,9 @@ class QueueRepository {
       '/api/queue/join',
       data: {'clinicId': clinicId},
     );
-    final entry = QueueEntry.fromJson(resp.data!);
+    final data = resp.data;
+    if (data == null) throw Exception('Empty response from server');
+    final entry = QueueEntry.fromJson(data);
     _myEntryId = entry.id;
     return entry;
   }
@@ -49,7 +51,9 @@ class QueueRepository {
       return entry;
     }
     final resp = await _dio.get<Map<String, dynamic>>('/api/queue/me');
-    return QueueEntry.fromJson(resp.data!);
+    final data = resp.data;
+    if (data == null) throw Exception('Empty response from server');
+    return QueueEntry.fromJson(data);
   }
 
   Future<int> aheadCount(int entryId) async {
@@ -58,7 +62,9 @@ class QueueRepository {
       '/api/queue/ahead',
       queryParameters: {'entryId': entryId},
     );
-    return (resp.data!['aheadCount'] as num).toInt();
+    final data = resp.data;
+    if (data == null) throw Exception('Empty response from server');
+    return (data['aheadCount'] as num).toInt();
   }
 
   Future<List<QueueEntry>> clinicQueue(int clinicId) async {
@@ -72,19 +78,25 @@ class QueueRepository {
   Future<QueueEntry> callNext(int entryId) async {
     if (AppConfig.demoMode) return _demo.callNext(entryId);
     final resp = await _dio.post<Map<String, dynamic>>('/api/queue/$entryId/call');
-    return QueueEntry.fromJson(resp.data!);
+    final data = resp.data;
+    if (data == null) throw Exception('Empty response from server');
+    return QueueEntry.fromJson(data);
   }
 
   Future<QueueEntry> markDone(int entryId) async {
     if (AppConfig.demoMode) return _demo.markDone(entryId);
     final resp = await _dio.post<Map<String, dynamic>>('/api/queue/$entryId/done');
-    return QueueEntry.fromJson(resp.data!);
+    final data = resp.data;
+    if (data == null) throw Exception('Empty response from server');
+    return QueueEntry.fromJson(data);
   }
 
   Future<QueueEntry> markNoShow(int entryId) async {
     if (AppConfig.demoMode) return _demo.markNoShow(entryId);
     final resp = await _dio.post<Map<String, dynamic>>('/api/queue/$entryId/noshow');
-    return QueueEntry.fromJson(resp.data!);
+    final data = resp.data;
+    if (data == null) throw Exception('Empty response from server');
+    return QueueEntry.fromJson(data);
   }
 
   // -------------------------------------------------------------------------

@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/config/app_config.dart';
+import '../../core/env.dart';
 import '../../core/network/health_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../shared/widgets/app_back_button.dart';
@@ -194,7 +195,7 @@ class _SystemStatusPageState extends ConsumerState<SystemStatusPage> {
                 children: [
                   _ConnectivityRow(
                     label: 'Backend URL',
-                    value: AppConfig.demoMode ? 'N/A (demo)' : 'http://10.0.2.2:8080',
+                    value: AppConfig.demoMode ? 'N/A (demo)' : apiBaseUrl,
                     ok: health == BackendStatus.ok || AppConfig.demoMode,
                   ),
                   const Divider(height: 20),

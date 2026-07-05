@@ -61,7 +61,9 @@ class AuthRepository {
       '/api/auth/login',
       data: {'email': email, 'password': password},
     );
-    final user = UserModel.fromJson(response.data!);
+    final data = response.data;
+    if (data == null) throw AuthFailure('Empty response from server');
+    final user = UserModel.fromJson(data);
     await _persist(user);
     return user;
   }
@@ -102,7 +104,8 @@ class AuthRepository {
         'role': role,
       },
     );
-    final data = response.data!;
+    final data = response.data;
+    if (data == null) throw AuthFailure('Empty response from server');
     final user = UserModel.fromJson(data);
     // Don't persist yet — wait for OTP verification
     return RegisterResult(user, data['otpCode'] as String?);
@@ -126,7 +129,9 @@ class AuthRepository {
       '/api/auth/verify-otp',
       data: {'email': email, 'code': code},
     );
-    final user = UserModel.fromJson(response.data!);
+    final data = response.data;
+    if (data == null) throw AuthFailure('Empty response from server');
+    final user = UserModel.fromJson(data);
     await _persist(user);
     return user;
   }

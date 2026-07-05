@@ -35,7 +35,8 @@ class AssistantRepository {
         'locale': locale,
       },
     );
-    final data = resp.data!;
+    final data = resp.data;
+    if (data == null) throw Exception('Empty response from server');
     return (
       reply: data['reply'] as String? ?? 'Sorry, something went wrong.',
       offline: data['offline'] as bool? ?? false,
