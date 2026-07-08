@@ -2,16 +2,21 @@
     "version": "0.2.0",
     "configurations": [
         {
+            // Values below are mirrored from .env (which is gitignored) because
+            // VS Code's ${env:VAR} substitution does not reliably read the
+            // "envFile" entry for toolArgs. Update both files together if you
+            // rotate these. EmailJS's service/template/public IDs are meant to
+            // be client-embedded (that's the point of the "public" key), so
+            // this is not a secret leak.
             "name": "clinic_now",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
-            "envFile": "${workspaceFolder}/.env",
             "toolArgs": [
-                "--dart-define=AGORA_APP_ID=${env:AGORA_APP_ID}",
-                "--dart-define=EMAILJS_SERVICE_ID=${env:EMAILJS_SERVICE_ID}",
-                "--dart-define=EMAILJS_TEMPLATE_ID=${env:EMAILJS_TEMPLATE_ID}",
-                "--dart-define=EMAILJS_PUBLIC_KEY=${env:EMAILJS_PUBLIC_KEY}"
+                "--dart-define=AGORA_APP_ID=8be3ac62ad80495886db03d0e99d426f",
+                "--dart-define=EMAILJS_SERVICE_ID=service_z04jncr",
+                "--dart-define=EMAILJS_TEMPLATE_ID=template_mqge98b",
+                "--dart-define=EMAILJS_PUBLIC_KEY=FcSChfLTtYBOvYfwO"
             ]
         }
     ]
