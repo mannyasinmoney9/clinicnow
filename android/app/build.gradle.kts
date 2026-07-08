@@ -11,13 +11,13 @@ android {
     ndkVersion = "28.2.13676358"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.toVersion("25")
-        targetCompatibility = JavaVersion.toVersion("25")
+        sourceCompatibility = JavaVersion.toVersion("21")
+        targetCompatibility = JavaVersion.toVersion("21")
         isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.toVersion("25").toString()
+        jvmTarget = JavaVersion.toVersion("21").toString()
     }
 
     defaultConfig {
