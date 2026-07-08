@@ -11,7 +11,7 @@ param([string]$target = "phone")
 $FLUTTER_SDK  = "C:\Users\DELL GAMING\Documents\flutter_windows_3.41.5-stable\flutter"
 $SAMSUNG_ID   = "R58R41QZAYL"
 $JAVA_HOME    = "C:\Program Files\Eclipse Adoptium\jdk-21.0.11.10-hotspot"
-$MVN          = "C:\Users\DELL GAMING\Desktop\Intelli Niga\IntelliJ IDEA 2025.3.2\plugins\maven\lib\maven3\bin\mvn.cmd"
+$MVN          = "C:\Program Files\JetBrains\IntelliJ IDEA 2025.3.2\plugins\maven\lib\maven3\bin\mvn.cmd"
 $BACKEND_DIR  = "C:\Users\DELL GAMING\Desktop\ClinicNow2\backend"
 
 # ---- Java ----

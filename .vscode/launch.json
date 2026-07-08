@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "clinic_now",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "envFile": "${workspaceFolder}/.env",
+            "toolArgs": [
+                "--dart-define=AGORA_APP_ID=${env:AGORA_APP_ID}",
+                "--dart-define=EMAILJS_SERVICE_ID=${env:EMAILJS_SERVICE_ID}",
+                "--dart-define=EMAILJS_TEMPLATE_ID=${env:EMAILJS_TEMPLATE_ID}",
+                "--dart-define=EMAILJS_PUBLIC_KEY=${env:EMAILJS_PUBLIC_KEY}"
+            ]
+        }
+    ]
+}
