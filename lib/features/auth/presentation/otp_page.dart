@@ -431,9 +431,11 @@ class _OtpBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return KeyboardListener(
-          focusNode: focusNode,
-          onKeyEvent: onKeyEvent,
+    return Focus(
+          onKeyEvent: (node, event) {
+            onKeyEvent(event);
+            return KeyEventResult.ignored;
+          },
           child: SizedBox(
             width: 48,
             height: 58,
