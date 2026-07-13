@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -26,6 +27,13 @@ class _PatientHomePageState extends ConsumerState<PatientHomePage>
   late final AnimationController _bgCtrl;
   late final AnimationController _pulseCtrl;
 
+  // Demo-only: clinic waiting counts start at 0 each time this page is
+  // created/refreshed and climb toward a target every 5s. This does not touch
+  // the real queue/WebSocket system, which stays backed by the backend.
+  static const _queueTargets = [14, 3, 11];
+  final List<int> _queueCounts = [0, 0, 0];
+  Timer? _queueTicker;
+
   @override
   void initState() {
     super.initState();
@@ -34,12 +42,36 @@ class _PatientHomePageState extends ConsumerState<PatientHomePage>
     _pulseCtrl = AnimationController(
             vsync: this, duration: 1600.ms)
         ..repeat(reverse: true);
+    _startDemoQueueTicker();
+  }
+
+  void _startDemoQueueTicker() {
+    _queueTicker?.cancel();
+    _queueTicker = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted) return;
+      setState(() {
+        for (var i = 0; i < _queueCounts.length; i++) {
+          if (_queueCounts[i] < _queueTargets[i]) _queueCounts[i]++;
+        }
+      });
+    });
+  }
+
+  void _resetDemoQueues() {
+    if (!mounted) return;
+    setState(() {
+      for (var i = 0; i < _queueCounts.length; i++) {
+        _queueCounts[i] = 0;
+      }
+    });
+    _startDemoQueueTicker();
   }
 
   @override
   void dispose() {
     _bgCtrl.dispose();
     _pulseCtrl.dispose();
+    _queueTicker?.cancel();
     super.dispose();
   }
 
@@ -87,6 +119,7 @@ class _PatientHomePageState extends ConsumerState<PatientHomePage>
                   child: RefreshIndicator(
                     color: AppColors.trustTeal,
                     onRefresh: () async {
+                      _resetDemoQueues();
                       await ref.read(healthProvider.notifier).check();
                       if (!context.mounted) return;
                       final ok = ref.read(healthProvider) == BackendStatus.ok;
@@ -140,10 +173,7 @@ class _PatientHomePageState extends ConsumerState<PatientHomePage>
                               label: 'Join Queue',
                               subtitle: 'Skip the wait',
                               color: AppColors.trustTeal,
-                              onTap: () => context.go('/queue/patient', extra: {
-                                'clinicId': 1,
-                                'clinicName': 'Ikorodu General Hospital',
-                              }),
+                              onTap: () => _showClinicPicker(context),
                               index: 0,
                             ),
                             _ActionCard(
@@ -159,6 +189,7 @@ class _PatientHomePageState extends ConsumerState<PatientHomePage>
                               label: 'Video Consult',
                               subtitle: 'See a doctor now',
                               color: const Color(0xFF7C3AED),
+                              badgeText: '2 waiting',
                               onTap: () => context.go('/payment', extra: {
                                 'amountNaira': 2000,
                                 'label': 'Dr. Oluwaseun Adeyemi · video consult',
@@ -200,15 +231,16 @@ class _PatientHomePageState extends ConsumerState<PatientHomePage>
                             .animate()
                             .fadeIn(delay: 700.ms, duration: 400.ms),
                         const SizedBox(height: 14),
-                        ..._clinics.asMap().entries.map(
-                              (e) => _ClinicCard(
-                                clinic: e.value,
-                                index: e.key,
-                              ).animate().fadeIn(
-                                  delay: Duration(
-                                      milliseconds: 750 + e.key * 80),
-                                  duration: 400.ms),
-                            ),
+                        ..._clinics.asMap().entries.map((e) {
+                          final (name, address, rating, _) = e.value;
+                          final liveQueue = '${_queueCounts[e.key]} waiting';
+                          return _ClinicCard(
+                            clinic: (name, address, rating, liveQueue),
+                            index: e.key,
+                          ).animate().fadeIn(
+                              delay: Duration(milliseconds: 750 + e.key * 80),
+                              duration: 400.ms);
+                        }),
                       ],
                     ),
                   ),
@@ -233,6 +265,63 @@ class _PatientHomePageState extends ConsumerState<PatientHomePage>
     ('Choba Community Clinic', 'University of PH Road', '4.7★', '3 waiting'),
     ('Rumuokoro Medical Centre', 'Iwofe Road', '4.3★', '11 waiting'),
   ];
+
+  void _showClinicPicker(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => Container(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+        decoration: BoxDecoration(
+          color: sheetContext.colors.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: sheetContext.colors.outlineVariant,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text('Which clinic?', style: sheetContext.text.titleLarge),
+            const SizedBox(height: 4),
+            Text('Pick where you want to join the queue',
+                style: sheetContext.text.bodySmall),
+            const SizedBox(height: 16),
+            ..._clinics.asMap().entries.map((e) {
+              final (name, address, rating, _) = e.value;
+              final clinicId = e.key + 1;
+              final liveQueue = '${_queueCounts[e.key]} waiting';
+              return Card(
+                margin: const EdgeInsets.only(bottom: 10),
+                child: ListTile(
+                  leading: const Icon(Icons.local_hospital_outlined,
+                      color: AppColors.trustTeal),
+                  title: Text(name,
+                      style: const TextStyle(fontWeight: FontWeight.w700)),
+                  subtitle: Text('$address · $rating · $liveQueue'),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    context.go('/queue/patient',
+                        extra: {'clinicId': clinicId, 'clinicName': name});
+                  },
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -396,17 +485,45 @@ class _ClinicBanner extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 const _tips = [
-  '💧 Drink at least 8 glasses of water daily',
-  '🍎 Eat more fruits and vegetables',
-  '🚶 30 minutes of walking daily keeps your heart healthy',
-  '😴 Get 7–9 hours of sleep every night',
-  '🩺 Regular check-ups catch problems early',
+  'Drink water regularly, especially in hot weather.',
+  'Wash your hands before meals and after using the restroom.',
+  'Walk for 30 minutes a day to support your heart.',
+  'Sleep for 7 to 9 hours when you can.',
+  'Take prescribed medicine at the correct time.',
+  'Keep clinic appointments, even when symptoms improve.',
+  'Eat fruits, vegetables, and protein every day.',
+  'Seek care early when fever or pain gets worse.',
+  'Keep emergency contacts saved on your phone.',
+  'Use teleconsult for urgent advice before travelling far.',
 ];
 
-class _HealthTip extends StatelessWidget {
+class _HealthTip extends StatefulWidget {
+  @override
+  State<_HealthTip> createState() => _HealthTipState();
+}
+
+class _HealthTipState extends State<_HealthTip> {
+  var _tipIndex = 0;
+  Timer? _tipTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _tipTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted) return;
+      setState(() => _tipIndex = (_tipIndex + 1) % _tips.length);
+    });
+  }
+
+  @override
+  void dispose() {
+    _tipTimer?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final tip = _tips[DateTime.now().day % _tips.length];
+    final tip = _tips[_tipIndex];
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -420,10 +537,18 @@ class _HealthTip extends StatelessWidget {
               color: AppColors.nairaGreen, size: 20),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              tip,
-              style: const TextStyle(
-                  fontSize: 13, color: AppColors.nairaGreen, height: 1.4),
+            child: AnimatedSwitcher(
+              duration: 300.ms,
+              transitionBuilder: (child, animation) => FadeTransition(
+                opacity: animation,
+                child: SizeTransition(sizeFactor: animation, child: child),
+              ),
+              child: Text(
+                tip,
+                key: ValueKey(tip),
+                style: const TextStyle(
+                    fontSize: 13, color: AppColors.nairaGreen, height: 1.4),
+              ),
             ),
           ),
         ],
@@ -444,6 +569,7 @@ class _ActionCard extends StatefulWidget {
     required this.color,
     required this.onTap,
     required this.index,
+    this.badgeText,
   });
 
   final IconData icon;
@@ -452,15 +578,17 @@ class _ActionCard extends StatefulWidget {
   final Color color;
   final VoidCallback onTap;
   final int index;
+  final String? badgeText;
 
   @override
   State<_ActionCard> createState() => _ActionCardState();
 }
 
 class _ActionCardState extends State<_ActionCard>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _pressCtrl;
   late final Animation<double> _scale;
+  late final AnimationController _badgePulseCtrl;
 
   @override
   void initState() {
@@ -470,11 +598,14 @@ class _ActionCardState extends State<_ActionCard>
     _scale =
         Tween<double>(begin: 1.0, end: 0.94).animate(
             CurvedAnimation(parent: _pressCtrl, curve: Curves.easeOut));
+    _badgePulseCtrl = AnimationController(vsync: this, duration: 1400.ms)
+      ..repeat(reverse: true);
   }
 
   @override
   void dispose() {
     _pressCtrl.dispose();
+    _badgePulseCtrl.dispose();
     super.dispose();
   }
 
@@ -493,44 +624,97 @@ class _ActionCardState extends State<_ActionCard>
           elevation: 0,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  widget.color.withAlpha(12),
-                  widget.color.withAlpha(5),
-                ],
-              ),
-              border: Border.all(color: widget.color.withAlpha(30)),
-            ),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: widget.color.withAlpha(20),
-                    borderRadius: BorderRadius.circular(12),
+          child: Stack(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      widget.color.withAlpha(12),
+                      widget.color.withAlpha(5),
+                    ],
                   ),
-                  child: Icon(widget.icon, color: widget.color, size: 24),
+                  border: Border.all(color: widget.color.withAlpha(30)),
                 ),
-                const Spacer(),
-                Text(widget.label,
-                    style: context.text.labelLarge
-                        ?.copyWith(fontWeight: FontWeight.w800)),
-                const SizedBox(height: 2),
-                Text(widget.subtitle,
-                    style: context.text.labelSmall?.copyWith(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurfaceVariant)),
-              ],
-            ),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: widget.color.withAlpha(20),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(widget.icon, color: widget.color, size: 24),
+                    ),
+                    const Spacer(),
+                    Text(widget.label,
+                        style: context.text.labelLarge
+                            ?.copyWith(fontWeight: FontWeight.w800)),
+                    const SizedBox(height: 2),
+                    Text(widget.subtitle,
+                        style: context.text.labelSmall?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant)),
+                  ],
+                ),
+              ),
+              if (widget.badgeText != null)
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: AnimatedBuilder(
+                    animation: _badgePulseCtrl,
+                    builder: (_, child) => Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(999),
+                        boxShadow: [
+                          BoxShadow(
+                            color: widget.color
+                                .withAlpha((60 + 40 * _badgePulseCtrl.value).toInt()),
+                            blurRadius: 8 + 4 * _badgePulseCtrl.value,
+                            spreadRadius: 0.5,
+                          ),
+                        ],
+                      ),
+                      child: child,
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: widget.color,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 5,
+                            height: 5,
+                            decoration: const BoxDecoration(
+                                color: Colors.white, shape: BoxShape.circle),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            widget.badgeText!,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),

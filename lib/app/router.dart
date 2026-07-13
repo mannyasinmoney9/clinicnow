@@ -37,8 +37,12 @@ class _AuthRouterNotifier extends ChangeNotifier {
     final loc = state.matchedLocation;
 
     const publicPaths = {
-      '/splash', '/onboarding', '/thankyou',
-      '/login', '/register', '/otp',
+      '/splash',
+      '/onboarding',
+      '/thankyou',
+      '/login',
+      '/register',
+      '/otp',
     };
 
     if (auth is AuthLoading) return null;
@@ -78,46 +82,31 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.onDispose(notifier.dispose);
 
   return GoRouter(
-    initialLocation: '/splash',
+    initialLocation: '/onboarding',
     refreshListenable: notifier,
     redirect: notifier.redirect,
     routes: [
-      GoRoute(
-        path: '/',
-        redirect: (_, _) => '/splash',
-      ),
-      GoRoute(
-        path: '/splash',
-        builder: (_, _) => const SplashPage(),
-      ),
-      GoRoute(
-        path: '/onboarding',
-        builder: (_, _) => const OnboardingPage(),
-      ),
-      GoRoute(
-        path: '/thankyou',
-        builder: (_, _) => const ThankYouPage(),
-      ),
+      GoRoute(path: '/', redirect: (_, _) => '/onboarding'),
+      GoRoute(path: '/splash', builder: (_, _) => const SplashPage()),
+      GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingPage()),
+      GoRoute(path: '/thankyou', builder: (_, _) => const ThankYouPage()),
       GoRoute(
         path: '/login',
         builder: (_, state) {
           final mode = (state.extra as Map<String, dynamic>?)?['mode'];
           return LoginPage(
-            initialMode:
-                mode == 'signup' ? AuthMode.signup : AuthMode.login,
+            initialMode: mode == 'signup' ? AuthMode.signup : AuthMode.login,
           );
         },
       ),
       GoRoute(
         path: '/register',
-        builder: (_, _) =>
-            const LoginPage(initialMode: AuthMode.signup),
+        builder: (_, _) => const LoginPage(initialMode: AuthMode.signup),
       ),
       GoRoute(
         path: '/otp',
         builder: (_, state) {
-          final extra =
-              state.extra as Map<String, dynamic>? ?? {};
+          final extra = state.extra as Map<String, dynamic>? ?? {};
           return OtpPage(
             email: extra['email'] as String? ?? '',
             demoOtpCode: extra['otpCode'] as String?,
@@ -128,34 +117,20 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/home/patient',
         builder: (_, _) => const PatientHomePage(),
       ),
-      GoRoute(
-        path: '/home/staff',
-        builder: (_, _) => const StaffHomePage(),
-      ),
-      GoRoute(
-        path: '/home/admin',
-        builder: (_, _) => const AdminHomePage(),
-      ),
+      GoRoute(path: '/home/staff', builder: (_, _) => const StaffHomePage()),
+      GoRoute(path: '/home/admin', builder: (_, _) => const AdminHomePage()),
       GoRoute(
         path: '/queue/patient',
         builder: (_, state) {
-          final extra =
-              state.extra as Map<String, dynamic>? ?? {};
+          final extra = state.extra as Map<String, dynamic>? ?? {};
           return PatientQueuePage(
             clinicId: extra['clinicId'] as int? ?? 1,
-            clinicName:
-                extra['clinicName'] as String? ?? 'Clinic',
+            clinicName: extra['clinicName'] as String? ?? 'Clinic',
           );
         },
       ),
-      GoRoute(
-        path: '/queue/staff',
-        builder: (_, _) => const StaffBoardPage(),
-      ),
-      GoRoute(
-        path: '/assistant',
-        builder: (_, _) => const AssistantPage(),
-      ),
+      GoRoute(path: '/queue/staff', builder: (_, _) => const StaffBoardPage()),
+      GoRoute(path: '/assistant', builder: (_, _) => const AssistantPage()),
       GoRoute(
         path: '/teleconsult',
         builder: (_, state) {
@@ -165,18 +140,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           return TeleconsultPage(asStaff: asStaff);
         },
       ),
-      GoRoute(
-        path: '/triage',
-        builder: (_, _) => const TriagePage(),
-      ),
+      GoRoute(path: '/triage', builder: (_, _) => const TriagePage()),
       GoRoute(
         path: '/appointments',
         builder: (_, _) => const AppointmentsPage(),
       ),
-      GoRoute(
-        path: '/profile',
-        builder: (_, _) => const ProfilePage(),
-      ),
+      GoRoute(path: '/profile', builder: (_, _) => const ProfilePage()),
       GoRoute(
         path: '/system-status',
         builder: (_, _) => const SystemStatusPage(),

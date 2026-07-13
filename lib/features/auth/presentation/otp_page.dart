@@ -50,8 +50,7 @@ class _OtpPageState extends ConsumerState<OtpPage>
     super.dispose();
   }
 
-  String get _enteredCode =>
-      _controllers.map((c) => c.text).join();
+  String get _enteredCode => _controllers.map((c) => c.text).join();
 
   void _onDigitChanged(int index, String value) {
     if (value.length > 1) {
@@ -101,13 +100,13 @@ class _OtpPageState extends ConsumerState<OtpPage>
 
   Future<void> _resend() async {
     try {
-      final result =
-          await ref.read(authRepositoryProvider).resendOtp(widget.email);
+      final result = await ref
+          .read(authRepositoryProvider)
+          .resendOtp(widget.email);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-              'New OTP sent! Demo code: ${result ?? '------'}'),
+          content: Text('New OTP sent! Demo code: ${result ?? '------'}'),
           backgroundColor: AppColors.nairaGreen,
         ),
       );
@@ -165,33 +164,37 @@ class _OtpPageState extends ConsumerState<OtpPage>
                 padding: const EdgeInsets.symmetric(horizontal: 28),
                 child: Column(
                   children: [
-                    const SizedBox(height: 56), // extra space so content clears the back button
-
+                    const SizedBox(
+                      height: 56,
+                    ), // extra space so content clears the back button
                     // Icon
                     Container(
-                      width: 96,
-                      height: 96,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          colors: [AppColors.trustTeal, AppColors.nairaGreen],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.nairaGreen.withAlpha(80),
-                            blurRadius: 24,
-                            spreadRadius: 4,
+                          width: 96,
+                          height: 96,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: const LinearGradient(
+                              colors: [
+                                AppColors.trustTeal,
+                                AppColors.nairaGreen,
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.nairaGreen.withAlpha(80),
+                                blurRadius: 24,
+                                spreadRadius: 4,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.verified_user_rounded,
-                        size: 48,
-                        color: Colors.white,
-                      ),
-                    )
+                          child: const Icon(
+                            Icons.verified_user_rounded,
+                            size: 48,
+                            color: Colors.white,
+                          ),
+                        )
                         .animate()
                         .scale(
                           begin: const Offset(0.4, 0.4),
@@ -204,14 +207,21 @@ class _OtpPageState extends ConsumerState<OtpPage>
                     const SizedBox(height: 28),
 
                     Text(
-                      'Verify your account',
-                      style: context.text.headlineMedium
-                          ?.copyWith(fontWeight: FontWeight.w800, color: Colors.white),
-                      textAlign: TextAlign.center,
-                    )
+                          'Verify your account',
+                          style: context.text.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
+                        )
                         .animate()
                         .fadeIn(delay: 200.ms, duration: 500.ms)
-                        .slideY(begin: 0.2, end: 0, delay: 200.ms, duration: 500.ms),
+                        .slideY(
+                          begin: 0.2,
+                          end: 0,
+                          delay: 200.ms,
+                          duration: 500.ms,
+                        ),
 
                     const SizedBox(height: 10),
 
@@ -223,9 +233,7 @@ class _OtpPageState extends ConsumerState<OtpPage>
                         height: 1.6,
                       ),
                       textAlign: TextAlign.center,
-                    )
-                        .animate()
-                        .fadeIn(delay: 300.ms, duration: 500.ms),
+                    ).animate().fadeIn(delay: 300.ms, duration: 500.ms),
 
                     const SizedBox(height: 36),
 
@@ -242,13 +250,16 @@ class _OtpPageState extends ConsumerState<OtpPage>
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: List.generate(6, (i) => _OtpBox(
-                          controller: _controllers[i],
-                          focusNode: _focusNodes[i],
-                          onChanged: (v) => _onDigitChanged(i, v),
-                          onKeyEvent: (e) => _onKeyEvent(i, e),
-                          index: i,
-                        )),
+                        children: List.generate(
+                          6,
+                          (i) => _OtpBox(
+                            controller: _controllers[i],
+                            focusNode: _focusNodes[i],
+                            onChanged: (v) => _onDigitChanged(i, v),
+                            onKeyEvent: (e) => _onKeyEvent(i, e),
+                            index: i,
+                          ),
+                        ),
                       ),
                     ),
 
@@ -256,17 +267,22 @@ class _OtpPageState extends ConsumerState<OtpPage>
                       const SizedBox(height: 16),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 10),
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.emergencyRed.withAlpha(30),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                              color: AppColors.emergencyRed.withAlpha(80)),
+                            color: AppColors.emergencyRed.withAlpha(80),
+                          ),
                         ),
                         child: Text(
                           _errorMsg!,
                           style: const TextStyle(
-                              color: Color(0xFFFFCDD2), fontSize: 13),
+                            color: Color(0xFFFFCDD2),
+                            fontSize: 13,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ).animate().fadeIn(duration: 300.ms),
@@ -290,13 +306,17 @@ class _OtpPageState extends ConsumerState<OtpPage>
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(
-                                    strokeWidth: 2.5,
-                                    color: Colors.white),
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                ),
                               )
-                            : const Text('Verify Code',
+                            : const Text(
+                                'Verify Code',
                                 style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700)),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                       ),
                     ).animate().fadeIn(delay: 500.ms, duration: 400.ms),
 
@@ -328,45 +348,54 @@ class _OtpPageState extends ConsumerState<OtpPage>
                               ? 'Hide demo code'
                               : 'Show demo code (dev only)',
                           style: const TextStyle(
-                              color: AppColors.waitAmber, fontSize: 12),
+                            color: AppColors.waitAmber,
+                            fontSize: 12,
+                          ),
                         ),
                       ).animate().fadeIn(delay: 700.ms, duration: 400.ms),
                       if (_showDemoCode)
                         Container(
-                          margin: const EdgeInsets.only(top: 8),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: AppColors.waitAmber.withAlpha(20),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                                color: AppColors.waitAmber.withAlpha(80)),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.lock_open_rounded,
-                                  size: 16, color: AppColors.waitAmber),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Code: ${widget.demoOtpCode}',
-                                style: const TextStyle(
-                                  color: AppColors.waitAmber,
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 8,
+                              margin: const EdgeInsets.only(top: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.waitAmber.withAlpha(20),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: AppColors.waitAmber.withAlpha(80),
                                 ),
                               ),
-                            ],
-                          ),
-                        )
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.lock_open_rounded,
+                                    size: 16,
+                                    color: AppColors.waitAmber,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Code: ${widget.demoOtpCode}',
+                                    style: const TextStyle(
+                                      color: AppColors.waitAmber,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 8,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
                             .animate()
                             .fadeIn(duration: 300.ms)
                             .scale(
-                                begin: const Offset(0.8, 0.8),
-                                end: const Offset(1.0, 1.0),
-                                duration: 300.ms,
-                                curve: Curves.easeOutBack),
+                              begin: const Offset(0.8, 0.8),
+                              end: const Offset(1.0, 1.0),
+                              duration: 300.ms,
+                              curve: Curves.easeOutBack,
+                            ),
                     ],
 
                     const SizedBox(height: 40),
@@ -403,49 +432,53 @@ class _OtpBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return KeyboardListener(
-      focusNode: focusNode,
-      onKeyEvent: onKeyEvent,
-      child: SizedBox(
-        width: 48,
-        height: 58,
-        child: TextFormField(
-          controller: controller,
           focusNode: focusNode,
-          keyboardType: TextInputType.number,
-          textAlign: TextAlign.center,
-          maxLength: 6,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          onChanged: onChanged,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            color: Colors.white,
+          onKeyEvent: onKeyEvent,
+          child: SizedBox(
+            width: 48,
+            height: 58,
+            child: TextFormField(
+              controller: controller,
+              focusNode: focusNode,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              maxLength: 1,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              onChanged: onChanged,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
+              decoration: InputDecoration(
+                counterText: '',
+                filled: true,
+                fillColor: Colors.white.withAlpha(20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: AppColors.trustTeal.withAlpha(80),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: AppColors.nairaGreen,
+                    width: 2,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.white.withAlpha(40)),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 14,
+                  horizontal: 4,
+                ),
+              ),
+            ),
           ),
-          decoration: InputDecoration(
-            counterText: '',
-            filled: true,
-            fillColor: Colors.white.withAlpha(20),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  BorderSide(color: AppColors.trustTeal.withAlpha(80)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: AppColors.nairaGreen, width: 2),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  BorderSide(color: Colors.white.withAlpha(40)),
-            ),
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
-          ),
-        ),
-      ),
-    )
+        )
         .animate(delay: Duration(milliseconds: 400 + index * 60))
         .fadeIn(duration: 300.ms)
         .slideY(begin: 0.3, end: 0, duration: 300.ms, curve: Curves.easeOut);
@@ -463,22 +496,26 @@ class _OtpBgPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     canvas.drawRect(
-        Offset.zero & size,
-        Paint()
-          ..shader = const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF040E0D), Color(0xFF0A2928)],
-          ).createShader(Offset.zero & size));
+      Offset.zero & size,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF040E0D), Color(0xFF0A2928)],
+        ).createShader(Offset.zero & size),
+    );
 
     for (int i = 0; i < 3; i++) {
       final phase = (t + i * 0.33) % 1.0;
       final glow = Paint()
-        ..color = AppColors.trustTeal
-            .withAlpha((10 + 8 * math.sin(phase * 2 * math.pi)).toInt());
+        ..color = AppColors.trustTeal.withAlpha(
+          (10 + 8 * math.sin(phase * 2 * math.pi)).toInt(),
+        );
       canvas.drawCircle(
-        Offset(size.width * [0.2, 0.8, 0.5][i],
-            size.height * [0.3, 0.6, 0.15][i]),
+        Offset(
+          size.width * [0.2, 0.8, 0.5][i],
+          size.height * [0.3, 0.6, 0.15][i],
+        ),
         size.width * 0.4,
         glow,
       );

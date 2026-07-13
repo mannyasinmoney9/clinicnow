@@ -73,10 +73,7 @@ class _PrimaryButtonState extends State<PrimaryButton>
             widget.loading || widget.onPressed == null ? null : (_) => _ctrl.forward(),
         onTapUp: widget.loading || widget.onPressed == null
             ? null
-            : (_) {
-                _ctrl.reverse();
-                widget.onPressed?.call();
-              },
+            : (_) => _ctrl.reverse(),
         onTapCancel: () => _ctrl.reverse(),
         child: FilledButton(
           onPressed: widget.loading ? null : widget.onPressed,

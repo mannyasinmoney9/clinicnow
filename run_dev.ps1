@@ -13,6 +13,9 @@ $SAMSUNG_ID   = "R58R41QZAYL"
 $JAVA_HOME    = "C:\Program Files\Eclipse Adoptium\jdk-21.0.11.10-hotspot"
 $MVN          = "C:\Program Files\JetBrains\IntelliJ IDEA 2025.3.2\plugins\maven\lib\maven3\bin\mvn.cmd"
 $BACKEND_DIR  = "C:\Users\DELL GAMING\Desktop\ClinicNow2\backend"
+$PROJECT_ROOT = $PSScriptRoot
+$PROJECT_PARENT = Split-Path -Parent $PROJECT_ROOT
+$PROJECT_ALIAS = "P:\clinic_now"
 
 # ---- Java ----
 $env:JAVA_HOME = $JAVA_HOME
@@ -28,6 +31,14 @@ if (-not (Test-Path "F:\")) {
     Write-Host "Mapped F: -> $FLUTTER_SDK" -ForegroundColor Green
 } else {
     Write-Host "F: drive already mapped" -ForegroundColor Green
+}
+
+# ---- Fix: map P: drive so Gradle/native-assets avoid paths with spaces ----
+if (-not (Test-Path "P:\")) {
+    subst P: $PROJECT_PARENT
+    Write-Host "Mapped P: -> $PROJECT_PARENT" -ForegroundColor Green
+} else {
+    Write-Host "P: drive already mapped" -ForegroundColor Green
 }
 
 # ---- Fix: junction C:\pc (no spaces in PUB_CACHE) ----
@@ -60,10 +71,22 @@ function Start-Flutter([string]$apiUrl, [string]$device) {
         }
     }
 
-    $AGORA_APP_ID        = $env:AGORA_APP_ID        ?? "8be3ac62ad80495886db03d0e99d426f"
-    $EMAILJS_SERVICE_ID  = $env:EMAILJS_SERVICE_ID  ?? ""
-    $EMAILJS_TEMPLATE_ID = $env:EMAILJS_TEMPLATE_ID ?? ""
-    $EMAILJS_PUBLIC_KEY  = $env:EMAILJS_PUBLIC_KEY  ?? ""
+    $AGORA_APP_ID = $env:AGORA_APP_ID
+    if ([string]::IsNullOrWhiteSpace($AGORA_APP_ID)) {
+        $AGORA_APP_ID = "8be3ac62ad80495886db03d0e99d426f"
+    }
+    $EMAILJS_SERVICE_ID = $env:EMAILJS_SERVICE_ID
+    if ([string]::IsNullOrWhiteSpace($EMAILJS_SERVICE_ID)) {
+        $EMAILJS_SERVICE_ID = ""
+    }
+    $EMAILJS_TEMPLATE_ID = $env:EMAILJS_TEMPLATE_ID
+    if ([string]::IsNullOrWhiteSpace($EMAILJS_TEMPLATE_ID)) {
+        $EMAILJS_TEMPLATE_ID = ""
+    }
+    $EMAILJS_PUBLIC_KEY = $env:EMAILJS_PUBLIC_KEY
+    if ([string]::IsNullOrWhiteSpace($EMAILJS_PUBLIC_KEY)) {
+        $EMAILJS_PUBLIC_KEY = ""
+    }
 
     $defines = @(
         "--dart-define=API_BASE_URL=$apiUrl",
@@ -73,10 +96,15 @@ function Start-Flutter([string]$apiUrl, [string]$device) {
         "--dart-define=EMAILJS_PUBLIC_KEY=$EMAILJS_PUBLIC_KEY"
     )
 
-    if ($device) {
-        & "F:\bin\flutter.bat" run -d $device @defines
-    } else {
-        & "F:\bin\flutter.bat" run @defines
+    Push-Location $PROJECT_ALIAS
+    try {
+        if ($device) {
+            & "F:\bin\flutter.bat" run -d $device @defines
+        } else {
+            & "F:\bin\flutter.bat" run @defines
+        }
+    } finally {
+        Pop-Location
     }
 }
 

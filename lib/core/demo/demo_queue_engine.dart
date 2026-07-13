@@ -26,12 +26,10 @@ class DemoQueueEngine {
         ),
     ];
     _nextId = _entries.length + 1;
-    _nextTicket = DemoSeed.firstTicketNumber + _entries.length;
   }
 
   late List<QueueEntry> _entries;
   late int _nextId;
-  late int _nextTicket;
   Timer? _ticker;
 
   final _snapshotController = StreamController<QueueSnapshot>.broadcast();
@@ -41,42 +39,69 @@ class DemoQueueEngine {
   Stream<Map<String, dynamic>> get userEvents => _userEventController.stream;
 
   void start() {
-    _broadcast();
+    _broadcast(DemoSeed.clinicId);
     _ticker ??= Timer.periodic(const Duration(seconds: 24), (_) => _tick());
   }
 
   void _tick() {
-    final calledIdx = _entries.indexWhere((e) => e.status == 'CALLED');
-    if (calledIdx != -1) {
-      _entries[calledIdx] = _entries[calledIdx].copyWith(status: 'SEEN');
+    final changedClinics = <int>{};
+    for (final clinicId in _activeClinicIds()) {
+      final calledIdx = _entries.indexWhere(
+        (e) => e.clinicId == clinicId && e.status == 'CALLED',
+      );
+      if (calledIdx != -1) {
+        _entries[calledIdx] = _entries[calledIdx].copyWith(status: 'SEEN');
+        changedClinics.add(clinicId);
+      }
+      if (_callNextWaitingIfNoneCalled(clinicId)) {
+        changedClinics.add(clinicId);
+      }
     }
-    _callNextWaitingIfNoneCalled();
     _recomputePositions();
-    _broadcast();
+    for (final clinicId in changedClinics) {
+      _broadcast(clinicId);
+    }
   }
 
-  void _callNextWaitingIfNoneCalled() {
-    if (_entries.any((e) => e.status == 'CALLED')) return;
-    final idx = _entries.indexWhere((e) => e.status == 'WAITING');
-    if (idx == -1) return;
+  bool _callNextWaitingIfNoneCalled(int clinicId) {
+    if (_entries.any((e) => e.clinicId == clinicId && e.status == 'CALLED')) {
+      return false;
+    }
+    final idx = _entries.indexWhere(
+      (e) => e.clinicId == clinicId && e.status == 'WAITING',
+    );
+    if (idx == -1) return false;
     _entries[idx] = _entries[idx].copyWith(status: 'CALLED');
     _fireUserEvent(_entries[idx], 'YOU_ARE_NEXT');
+    return true;
   }
 
-  QueueEntry join({required int userId, required String patientName}) {
+  QueueEntry join({
+    required int clinicId,
+    required int userId,
+    required String patientName,
+  }) {
+    final nextTicket = _entries
+            .where((e) => e.clinicId == clinicId)
+            .map((e) => e.queueNumber)
+            .fold<int>(0, (max, value) => value > max ? value : max) +
+        1;
     final entry = QueueEntry(
       id: _nextId++,
-      clinicId: DemoSeed.clinicId,
+      clinicId: clinicId,
       userId: userId,
-      queueNumber: _nextTicket++,
+      queueNumber: nextTicket,
       status: 'WAITING',
-      position: _entries.where((e) => e.status == 'WAITING').length + 1,
+      position: _entries
+              .where((e) => e.clinicId == clinicId && e.status == 'WAITING')
+              .length +
+          1,
       patientName: patientName,
       joinedAt: DateTime.now(),
     );
     _entries.add(entry);
     _recomputePositions();
-    _broadcast();
+    _broadcast(clinicId);
     return entry;
   }
 
@@ -90,15 +115,24 @@ class DemoQueueEngine {
     return null;
   }
 
-  List<QueueEntry> clinicQueue() => List.unmodifiable(
-        _entries.where((e) => e.status == 'WAITING' || e.status == 'CALLED'),
+  QueueEntry? myEntryById(int id) => _findById(id);
+
+  List<QueueEntry> clinicQueue(int clinicId) => List.unmodifiable(
+        _entries.where(
+          (e) =>
+              e.clinicId == clinicId &&
+              (e.status == 'WAITING' || e.status == 'CALLED'),
+        ),
       );
 
   int aheadCount(int entryId) {
     final target = _findById(entryId);
     if (target == null || target.status != 'WAITING') return 0;
     return _entries
-        .where((e) => e.status == 'WAITING' && e.position < target.position)
+        .where((e) =>
+            e.clinicId == target.clinicId &&
+            e.status == 'WAITING' &&
+            e.position < target.position)
         .length;
   }
 
@@ -108,7 +142,7 @@ class DemoQueueEngine {
     _entries[idx] = _entries[idx].copyWith(status: 'CALLED');
     _recomputePositions();
     _fireUserEvent(_entries[idx], 'YOU_ARE_NEXT');
-    _broadcast();
+    _broadcast(_entries[idx].clinicId);
     return _entries[idx];
   }
 
@@ -120,7 +154,7 @@ class DemoQueueEngine {
     if (idx == -1) throw StateError('Queue entry not found');
     _entries[idx] = _entries[idx].copyWith(status: status);
     _recomputePositions();
-    _broadcast();
+    _broadcast(_entries[idx].clinicId);
     return _entries[idx];
   }
 
@@ -132,16 +166,24 @@ class DemoQueueEngine {
   }
 
   void _recomputePositions() {
-    var pos = 1;
-    for (var i = 0; i < _entries.length; i++) {
-      if (_entries[i].status == 'WAITING') {
-        _entries[i] = _entries[i].copyWith(position: pos);
-        pos++;
-      } else if (_entries[i].status == 'CALLED') {
-        _entries[i] = _entries[i].copyWith(position: 0);
+    for (final clinicId in _activeClinicIds()) {
+      var pos = 1;
+      for (var i = 0; i < _entries.length; i++) {
+        if (_entries[i].clinicId != clinicId) continue;
+        if (_entries[i].status == 'WAITING') {
+          _entries[i] = _entries[i].copyWith(position: pos);
+          pos++;
+        } else if (_entries[i].status == 'CALLED') {
+          _entries[i] = _entries[i].copyWith(position: 0);
+        }
       }
     }
   }
+
+  Set<int> _activeClinicIds() => {
+        DemoSeed.clinicId,
+        ..._entries.map((e) => e.clinicId),
+      };
 
   void _fireUserEvent(QueueEntry entry, String type) {
     if (_userEventController.isClosed) return;
@@ -152,15 +194,18 @@ class DemoQueueEngine {
     });
   }
 
-  void _broadcast() {
+  void _broadcast(int clinicId) {
     if (_snapshotController.isClosed) return;
-    final visible =
-        _entries.where((e) => e.status == 'WAITING' || e.status == 'CALLED').toList();
+    final visible = _entries
+        .where((e) =>
+            e.clinicId == clinicId &&
+            (e.status == 'WAITING' || e.status == 'CALLED'))
+        .toList();
     _snapshotController.add(
       QueueSnapshot(
-        clinicId: DemoSeed.clinicId,
+        clinicId: clinicId,
         entries: visible,
-        totalWaiting: _entries.where((e) => e.status == 'WAITING').length,
+        totalWaiting: visible.where((e) => e.status == 'WAITING').length,
         broadcastedAt: DateTime.now(),
       ),
     );

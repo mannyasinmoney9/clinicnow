@@ -26,6 +26,7 @@ class QueueRepository {
   Future<QueueEntry> joinQueue(int clinicId, {int? userId, String? patientName}) async {
     if (AppConfig.demoMode) {
       final entry = _demo.join(
+        clinicId: clinicId,
         userId: userId ?? 0,
         patientName: (patientName == null || patientName.isEmpty) ? 'You' : patientName,
       );
@@ -46,7 +47,7 @@ class QueueRepository {
   Future<QueueEntry> myCurrentEntry() async {
     if (AppConfig.demoMode) {
       final id = _myEntryId;
-      final entry = id == null ? null : _demo.clinicQueue().where((e) => e.id == id).firstOrNull;
+      final entry = id == null ? null : _demo.myEntryById(id);
       if (entry == null) throw StateError('No active queue entry');
       return entry;
     }
@@ -68,7 +69,7 @@ class QueueRepository {
   }
 
   Future<List<QueueEntry>> clinicQueue(int clinicId) async {
-    if (AppConfig.demoMode) return _demo.clinicQueue();
+    if (AppConfig.demoMode) return _demo.clinicQueue(clinicId);
     final resp = await _dio.get<List<dynamic>>('/api/queue/clinic/$clinicId');
     return (resp.data ?? [])
         .map((e) => QueueEntry.fromJson(e as Map<String, dynamic>))

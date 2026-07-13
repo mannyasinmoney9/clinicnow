@@ -98,12 +98,18 @@ class _PatientQueuePageState extends ConsumerState<PatientQueuePage>
                     message: msg,
                     onRetry: _join,
                   ),
-                MyEntryData(entry: final entry) => _InQueueView(
+                // Only show "in queue" for the clinic this page is actually
+                // for — myEntryProvider is global (a patient can only be in
+                // one queue at a time), so a stale entry from a *different*
+                // clinic must fall back to the join prompt here.
+                MyEntryData(entry: final entry) when entry.clinicId == widget.clinicId =>
+                  _InQueueView(
                     entry: entry,
                     tokenCtrl: _tokenCtrl,
                     orbitCtrl: _orbitCtrl,
                     snapshot: snapshotAsync.value,
                   ),
+                MyEntryData() => _JoinView(onJoin: _join),
               },
             ),
           ),
